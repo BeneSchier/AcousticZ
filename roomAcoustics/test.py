@@ -68,10 +68,12 @@ def RandSampleSphere(N):
     s = np.sin(lat)
     x = np.multiply(np.cos(lon),s)
     y = np.multiply(np.sin(lon),s)
-    return [x,y,z]
+    print('x:', np.shape(x))
+    print('xyz:', np.shape([x,y,z]))
+    return np.transpose([x,y,z])[0]
     
 def getImpactWall(ray_xyz, ray_dxyz, roomDims):
-    surfaceofimpact = 1
+    surfaceofimpact = -1
     displacement = 1000
     
     # Compute time to intersection with x-surfaces
@@ -80,7 +82,7 @@ def getImpactWall(ray_xyz, ray_dxyz, roomDims):
         displacement = -ray_xyz[0] / ray_dxyz[0]
         if(displacement == 0):
             displacement = 1000
-        surfaceofimpact = 0
+        surfaceofimpact = -1
     elif (ray_dxyz[0] > 0):
         displacement = (roomDims[0] - ray_xyz[0]) / ray_dxyz[0]
         if (displacement == 0):
@@ -116,25 +118,25 @@ def getImpactWall(ray_xyz, ray_dxyz, roomDims):
 
 def getWallNormalVector(surfaceofimact):
     match surfaceofimpact:
-        case 1: 
+        case 0: 
             N = [1., 0., 0.]
-        case 2:
+        case 1:
             N = [-1., 0., 0.]
-        case 3:
+        case 2:
             N = [0., 1., 0.]
-        case 4:
+        case 3:
             N = [0., -1., 0.]
-        case 5: 
+        case 4: 
             N = [0., 0., 1.]
-        case 6:
+        case 5:
             N = [0., 0., -1.]
     
     return N
 
     
-roomDimensions = [5, 5, 5]
-receiverCoord = [2, 2, 2]
-sourceCoord = [1, 1, 1]
+roomDimensions = [10, 8, 4]
+receiverCoord = [5, 8, 1.8]
+sourceCoord = [2, 2, 2]
 # Treat receiver as a sphere with radius of 8,75cm
 r = 0.0875
 
@@ -145,12 +147,12 @@ r = 0.0875
 # Generate Random Rays
 
 N = 5000
-rays = np.transpose(RandSampleSphere(N))
-rays = rays[0]
+rays = RandSampleSphere(N)
+print(np.shape(rays))
 # print(np.array(rays).shape)
 
 # frequencies at which the absorption coefficients are defined
-FVect = [125, 250, 500, 1000, 2000, 4000]
+FVect = np.array([125, 250, 500, 1000, 2000, 4000])
 # Absorption coefficients
 A = np.array([[0.08, 0.09, 0.12, 0.16, 0.22, 0.24],
     [0.08, 0.09, 0.12, 0.16, 0.22, 0.24],
@@ -171,18 +173,20 @@ D = np.array([[0.05, 0.3, 0.7, 0.9, 0.92, 0.94],
 
 histTimeStep = 0.0010
 impResTime = 1.0
-# nTBins = np.round(impResTime/histTimeStep)
-nTBins = 5000
+nTBins = np.round(impResTime/histTimeStep)
+# nTBins = 5000
 print(nTBins)
 nFBins = len(FVect)
 
-TFHist = np.zeros([int(nTBins), int(nFBins)])
+TFHist = np.zeros([int(nTBins+1), int(nFBins)])
 
 
 
 # Perform Ray Tracing
 
+# outer for loops iterates over frequencies
 for iBand in tqdm(range(nFBins)):
+    # inner for loop iterates over rays
     for iRay in tqdm(range(len(rays))):
         # print(rays)
         ray = rays[iRay, :]
@@ -190,7 +194,7 @@ for iBand in tqdm(range(nFBins)):
         # All rays start at the source
         ray_xyz = sourceCoord
         # set initial ray direction. this changes with every reflection of the ray
-        ray_dxyz = np.transpose(ray)
+        ray_dxyz = ray
         # Initialize ray travel time, Ray Tracing is terminated when travel time exceeds impulse response length
         ray_time = 0
         
@@ -198,11 +202,12 @@ for iBand in tqdm(range(nFBins)):
         ray_energy = 1
         
         while (ray_time <= impResTime):
+            
             # determine the surface that the ray encounters
             [surfaceofimpact, displacement] = getImpactWall(ray_xyz, ray_dxyz, roomDimensions)
             
             # determine distance of the ray
-            distance = np.sqrt(np.sum(np.power(displacement,2)))
+            distance = np.sqrt(np.sum(displacement ** 2))
              
             # Determine coords of impact point
             impactCoord = ray_xyz + displacement
@@ -211,8 +216,8 @@ for iBand in tqdm(range(nFBins)):
             ray_xyz = impactCoord
             
             # update cumulative ray travel time
-            c = 343
-            ray_time += distance/c
+            c = 343.0
+            ray_time += (distance/c)
             
             # apply surface reflection -> amount of energy that is not lost through absorption
             ray_energy = ray_energy * R[surfaceofimpact, iBand]
@@ -224,22 +229,26 @@ for iBand in tqdm(range(nFBins)):
             rayrecvvector = receiverCoord - impactCoord
             
             # ray's time of arrival at receiver
-            distance = np.linalg.norm(rayrecvvector)
+            distance = np.sqrt(np.sum(rayrecvvector * rayrecvvector))
             recv_timeofarrival = ray_time + distance / c
             
             if(recv_timeofarrival > impResTime):
+                # print('yay')
+                # print(np.floor(impResTime / histTimeStep + 0.5))
                 break
             
             # Determine amount of diffuse energy that reaches receiver
             
             # received energy
             N = getWallNormalVector(surfaceofimpact)
-            cosTheta = np.sum(np.multiply(rayrecvvector,N)) / np.linalg.norm(rayrecvvector)
-            cosAlpha = np.linalg.norm(rayrecvvector-r**2) / np.linalg.norm(rayrecvvector)
-            E = (1-cosAlpha)*2*cosTheta*rayrecv_energy
+            cosTheta = np.sum(rayrecvvector * N) / (np.sqrt(np.sum(rayrecvvector ** 2)))
+            cosAlpha = np.sqrt(np.sum(rayrecvvector ** 2) - r ** 2) / np.sum(rayrecvvector ** 2)
+            E = (1 - cosAlpha) * 2 * cosTheta * rayrecv_energy
             
             # updtae historgram
             tbin = np.floor(recv_timeofarrival / histTimeStep + 0.5)
+            # if(tbin >= 1000):
+                # print('tbin=', tbin)
             # print(tbin)
             TFHist[int(tbin),iBand] += E
             
@@ -252,28 +261,49 @@ for iBand in tqdm(range(nFBins)):
                 d = -d
             
             # specular reflection
-            # print((np.sum(np.multiply(ray_dxyz,N))))
-            0.333333 * np.double(N)
             ref = ray_dxyz - 2.0 * (np.sum(np.multiply(ray_dxyz,N))) * np.double(N)
             
             # combine specular and random components
+            d = d / np.linalg.norm(d)
             ref /= np.linalg.norm(ref)
             ray_dxyz = D[surfaceofimpact, iBand] * d + (1 - D[surfaceofimpact, iBand]) * ref
             ray_dxyz /= np.linalg.norm(ray_dxyz)
             ray_dxyz = ray_dxyz[0,:]
+            if(TFHist.any() < 0 ):
+                print('Achtung!!!!!!!!!!!')
+        if(TFHist.any() < 0 ):
+                print('Achtung!!!!!!!!!!!')
+
+# labels = ["125 Hz", "250 Hz", "500 Hz", "1000 Hz", "2000 Hz", "4000 Hz"]        
+# plt.figure()
+# plt.bar(histTimeStep*np.arange(len(TFHist)),TFHist[:,0], width=0.001)
+# plt.bar(histTimeStep*np.arange(len(TFHist)),TFHist[:,1], width=0.001)
+# plt.bar(histTimeStep*np.arange(len(TFHist)),TFHist[:,2], width=0.001)
+# plt.bar(histTimeStep*np.arange(len(TFHist)) ,TFHist[:,3], width=0.001)
+# plt.bar(histTimeStep*np.arange(len(TFHist)),TFHist[:,4], width=0.001)
+# plt.bar(histTimeStep*np.arange(len(TFHist)),TFHist[:,5],width=0.001)
+# # plt.hist(histTimeStep*np.arange(len(TFHist)),TFHist)
+# print('np.arange(len(TFHist))=', np.arange(len(TFHist)))
+# print('TFHist=', TFHist)
+# plt.grid(True)
+# plt.xlabel("Time (s)")
+# plt.legend(labels)
+# plt.show()
 
 
-labels = ["125 Hz", "250 Hz", "500 Hz", "1000 Hz", "2000 Hz", "4000 Hz"]        
+# Calculate the x-axis values
+x = histTimeStep * np.arange(TFHist.shape[0] * TFHist.shape[1])
+
+# Create the bar plot
+x = histTimeStep * np.arange(TFHist.shape[0])
+
+# Create the bar plot
 plt.figure()
-plt.bar(histTimeStep*np.arange(len(TFHist)),TFHist[:,0])
-plt.bar(histTimeStep*np.arange(len(TFHist)),TFHist[:,1])
-plt.bar(histTimeStep*np.arange(len(TFHist)),TFHist[:,2])
-plt.bar(histTimeStep*np.arange(len(TFHist)),TFHist[:,3])
-plt.bar(histTimeStep*np.arange(len(TFHist)),TFHist[:,4])
-plt.bar(histTimeStep*np.arange(len(TFHist)),TFHist[:,5])
+for i in range(TFHist.shape[1]):
+    plt.bar(x + i * histTimeStep, TFHist[:, i], width=0.0005)
 plt.grid(True)
 plt.xlabel("Time (s)")
-plt.legend(labels)
+plt.legend(["125 Hz", "250 Hz", "500 Hz", "1000 Hz", "2000 Hz", "4000 Hz"])
 plt.show()
 
             
