@@ -1,6 +1,10 @@
 import numpy as np
+import concurrent.futures
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from scipy import signal
+from scipy.signal import hann
+from scipy.fft import fft, ifft
 from tqdm import tqdm
 
 def plot_room(roomDimensions, receiverCoord, sourceCoord):
@@ -146,7 +150,7 @@ r = 0.0875
 
 # Generate Random Rays
 
-N = 5000
+N = 50
 rays = RandSampleSphere(N)
 print(np.shape(rays))
 # print(np.array(rays).shape)
@@ -298,14 +302,123 @@ x = histTimeStep * np.arange(TFHist.shape[0] * TFHist.shape[1])
 x = histTimeStep * np.arange(TFHist.shape[0])
 
 # Create the bar plot
+# plt.figure()
+# for i in range(TFHist.shape[1]):
+#     plt.bar(x + i * histTimeStep, TFHist[:, i], width=0.0005)
+# plt.grid(True)
+# plt.xlabel("Time (s)")
+# plt.legend(["125 Hz", "250 Hz", "500 Hz", "1000 Hz", "2000 Hz", "4000 Hz"])
+# plt.show()
+
+
+
+# Generate Room Impulse Response
+
+# audio sample rate 
+fs = 44100
+V = np.prod(roomDimensions) # calculate volume of room
+t0 = ((2 * V * np.log(2))/(4 * np.pi * c**3))**(1/3)
+
+# Initialize random Poisson process vector
+# poissonProcess = np.array([])
+# timeValues = np.array([])
+timeValues = []
+poissonProcess = []
+# Create Random process
+t = t0
+while (t < impResTime):
+    timeValues.append(t)
+    if(np.round(t * fs) - t * fs) < 0:
+        poissonProcess.append(1)
+    else:
+        poissonProcess.append(-1)
+
+    # determine mean event occurence
+    mu = min(1e4, 4.0 * np.pi * c**3.0 * t**2 / V)
+
+
+    # determine the interval size
+    deltaTA = (1.0/mu) * np.log(1.0/np.random.rand())
+    t = t+deltaTA
+
+# Create random process sampled at the specified sample rate
+randSeq = np.zeros(int(np.ceil(impResTime * fs)))
+
+for index in range(len(timeValues)):
+    print('size of randSeq', randSeq.size)
+    randSeq[int(np.ceil(np.ceil(timeValues[index] * fs))) - 1] = poissonProcess[index]
+
+print('poissonProcess=', poissonProcess)
+
+
+# Pass Poisson Process Through Bandpass Filters
+flow = np.array([115, 225, 450, 900, 1800, 3600])
+fhigh = np.array([135, 275, 550, 1100, 2200, 4400])
+
+NFFT = 8192
+
+win = hann(882, sym=True)
+overlap_length = 441
+# F, t, sfft = signal.stft(win, window=win, nperseg=len(win), noverlap=overlap_length, nfft=nfft, fs=fs, boundary='zeros')
+# isfft = ifft(win)
+F = np.linspace(0, fs/2, NFFT // 2 + 1)
+
+# Create bandpass filters
+RCF = np.zeros([len(FVect),NFFT // 2 + 1])
+for index0 in range(len(FVect)):
+    for index in range(len(F)):
+        f = F[index]
+        if f < FVect[index0] and f >= flow[index0]:
+            RCF[index0, index] = 0.5 * (1 + np.cos(2 * np.pi * f / FVect[index0]))
+        if f < fhigh[index0] and f >= FVect[index0]:
+            RCF[index0, index] = 0.5 * (1 - np.cos(2 * np.pi * f / (FVect[index0] + 1)))          
+
+# Filter poisson sequence through six bandpass filters
+
+frameLength = 882
+numFrames = len(randSeq) // frameLength
+y = np.zeros([len(randSeq), 6])
+for index in range(numFrames):
+    print('randSeq=', randSeq)
+    x = randSeq[(index) * frameLength : (index + 1) * frameLength]
+    print('x = ', x)
+    _, _, X = signal.stft(x, window=win, nperseg=len(win), noverlap=overlap_length, nfft=NFFT, fs=fs, boundary='zeros')
+    X = np.repeat(X, 2, axis=1)  # Repeat X to have 6 bands
+    X = np.multiply(X, RCF.T)
+    _, y_frame = signal.istft(X, window=win, nperseg=len(win), noverlap=overlap_length, nfft=NFFT, fs=fs, boundary=True)
+    y_frame = y_frame[:frameLength]  # Trim to frame length
+    y[(index) * frameLength : (index + 1) * frameLength, :] = np.expand_dims(y_frame, axis=1)
+
+# Compute the times corresponding to the impulse respnse samples
+impTimes = (1 / fs) * np.arange(y.size)
+
+
+# Compute the times corresponding to the histogram bins
+hisTimes = histTimeStep / 2 + histTimeStep + np.arange(nTBins)
+
+W = np.zeros([impTimes.size, np.prod(FVect.size)])
+BW = fhigh - flow
+for k in range(len(TFHist)):
+    gk0 = int(np.floor((k-1) * fs * histTimeStep) + 1)
+    gk1 = int(np.floor(k * fs * histTimeStep))
+    yy = np.power(y[gk0 : gk1, :], 2)
+    val = np.divide(np.sqrt(TFHist[k,:]), np.multiply(np.sum(yy,0), np.sqrt(BW / (fs / 2))))
+    print('size of TFHist', len(TFHist))
+    print('size of W', len(W))
+
+    for iRay in range(gk0, gk1):
+        W[iRay, :] = val
+
+# Create the impulse response
+y = np.multiply(y, W)
+ip = np.sum(y, 1)
+ip = np.divide(ip, np.max(np.abs(ip)))
+
+# Plotting
 plt.figure()
-for i in range(TFHist.shape[1]):
-    plt.bar(x + i * histTimeStep, TFHist[:, i], width=0.0005)
+plt.plot((1 / fs) * np.arrange(np.prod(ip.size)-1), ip)
 plt.grid(True)
 plt.xlabel("Time (s)")
-plt.legend(["125 Hz", "250 Hz", "500 Hz", "1000 Hz", "2000 Hz", "4000 Hz"])
+plt.ylabel("Impulse Response")
 plt.show()
-
-            
-            
 
