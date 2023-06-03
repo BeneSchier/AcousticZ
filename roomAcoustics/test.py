@@ -2,6 +2,7 @@ import numpy as np
 import concurrent.futures
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import scipy
 from scipy import signal
 from scipy.signal import hann
 from scipy.fft import fft, ifft
@@ -139,7 +140,7 @@ def getWallNormalVector(surfaceofimact):
 
     
 roomDimensions = [10, 8, 4]
-receiverCoord = [5, 8, 1.8]
+receiverCoord = [5, 5, 1.8]
 sourceCoord = [2, 2, 2]
 # Treat receiver as a sphere with radius of 8,75cm
 r = 0.0875
@@ -151,6 +152,7 @@ r = 0.0875
 # Generate Random Rays
 
 N = 5000
+np.random.seed(0)
 rays = RandSampleSphere(N)
 print(np.shape(rays))
 # print(np.array(rays).shape)
@@ -163,7 +165,7 @@ A = np.array([[0.08, 0.09, 0.12, 0.16, 0.22, 0.24],
     [0.08, 0.09, 0.12, 0.16, 0.22, 0.24],
     [0.08, 0.09, 0.12, 0.16, 0.22, 0.24],
     [0.08, 0.09, 0.12, 0.16, 0.22, 0.24],
-    [0.08, 0.09, 0.12, 0.16, 0.22, 0.24]])
+    [0.08, 0.09, 0.12, 0.16, 0.22, 0.24]]).T
 # Reflection coefficients
 R = np.sqrt(1 - A)
 
@@ -182,7 +184,7 @@ nTBins = np.round(impResTime/histTimeStep)
 print(nTBins)
 nFBins = len(FVect)
 
-TFHist = np.zeros([int(nTBins+1), int(nFBins)])
+TFHist = np.zeros([int(nTBins)+1, int(nFBins)]) # hier sollte eig die +1 nicht stehen bei den nTBins
 
 
 
@@ -190,7 +192,7 @@ TFHist = np.zeros([int(nTBins+1), int(nFBins)])
 
 # outer for loops iterates over frequencies
 for iBand in tqdm(range(nFBins)):
-    # inner for loop iterates over rays
+    # inner for loop iterates over rays (independant, we can paralleliize this shit)
     for iRay in tqdm(range(len(rays))):
         # print(rays)
         ray = rays[iRay, :]
@@ -211,7 +213,7 @@ for iBand in tqdm(range(nFBins)):
             [surfaceofimpact, displacement] = getImpactWall(ray_xyz, ray_dxyz, roomDimensions)
             
             # determine distance of the ray
-            distance = np.sqrt(np.sum(displacement ** 2))
+            distance = np.sqrt(np.sum(np.power(displacement, 2))) # IMPORTANT: this should be element-wise quadrat 
              
             # Determine coords of impact point
             impactCoord = ray_xyz + displacement
@@ -233,7 +235,7 @@ for iBand in tqdm(range(nFBins)):
             rayrecvvector = receiverCoord - impactCoord
             
             # ray's time of arrival at receiver
-            distance = np.sqrt(np.sum(rayrecvvector * rayrecvvector))
+            distance = np.sqrt(np.sum(np.multiply(rayrecvvector,rayrecvvector)))
             recv_timeofarrival = ray_time + distance / c
             
             if(recv_timeofarrival > impResTime):
@@ -246,7 +248,7 @@ for iBand in tqdm(range(nFBins)):
             # received energy
             N = getWallNormalVector(surfaceofimpact)
             cosTheta = np.sum(rayrecvvector * N) / (np.sqrt(np.sum(rayrecvvector ** 2)))
-            cosAlpha = np.sqrt(np.sum(rayrecvvector ** 2) - r ** 2) / np.sum(rayrecvvector ** 2)
+            cosAlpha = np.sqrt(np.sum(rayrecvvector ** 2) - r ** 2) / np.sum(np.power(rayrecvvector, 2))
             E = (1 - cosAlpha) * 2 * cosTheta * rayrecv_energy
             
             # updtae historgram
@@ -296,19 +298,19 @@ for iBand in tqdm(range(nFBins)):
 
 
 # Calculate the x-axis values
-x = histTimeStep * np.arange(TFHist.shape[0] * TFHist.shape[1])
+# x = histTimeStep * np.arange(TFHist.shape[0] * TFHist.shape[1])
 
 # Create the bar plot
-x = histTimeStep * np.arange(TFHist.shape[0])
+x = histTimeStep * np.arange(TFHist.shape[0]) # das sollte eig die Zeile darüber sein in der Theorie
 
 # Create the bar plot
-# plt.figure()
-# for i in range(TFHist.shape[1]):
-#     plt.bar(x + i * histTimeStep, TFHist[:, i], width=0.0005)
-# plt.grid(True)
-# plt.xlabel("Time (s)")
-# plt.legend(["125 Hz", "250 Hz", "500 Hz", "1000 Hz", "2000 Hz", "4000 Hz"])
-# plt.show()
+plt.figure()
+for i in range(TFHist.shape[1]):
+     plt.bar(x + i * histTimeStep, TFHist[:, i], width=0.0005)
+plt.grid(True)
+plt.xlabel("Time (s)")
+plt.legend(["125 Hz", "250 Hz", "500 Hz", "1000 Hz", "2000 Hz", "4000 Hz"])
+plt.show()
 
 
 
@@ -346,7 +348,7 @@ randSeq = np.zeros(int(np.ceil(impResTime * fs)))
 
 for index in range(len(timeValues)):
     print('size of randSeq', randSeq.size)
-    randSeq[int(np.ceil(np.ceil(timeValues[index] * fs))) - 1] = poissonProcess[index]
+    randSeq[int(np.round(timeValues[index] * fs)) - 1] = poissonProcess[index]
 
 print('poissonProcess=', poissonProcess)
 
@@ -357,7 +359,7 @@ fhigh = np.array([135, 275, 550, 1100, 2200, 4400])
 
 NFFT = 8192
 
-win = hann(882, sym=True)
+win = scipy.signal.windows.hann(882)
 overlap_length = 441
 # F, t, sfft = signal.stft(win, window=win, nperseg=len(win), noverlap=overlap_length, nfft=nfft, fs=fs, boundary='zeros')
 # isfft = ifft(win)
@@ -381,11 +383,12 @@ y = np.zeros([len(randSeq), 6])
 for index in range(numFrames):
     print('randSeq=', randSeq)
     x = randSeq[(index) * frameLength : (index + 1) * frameLength]
-    print('x = ', x)
-    _, _, X = signal.stft(x, window=win, nperseg=len(win), noverlap=overlap_length, nfft=NFFT, fs=fs, boundary='zeros')
-    X = np.repeat(X, 2, axis=1)  # Repeat X to have 6 bands
+    # x = np.repeat(x, 2)
+    print('x = ', len(x))
+    _, _, X = signal.stft(x, window=win, nperseg=len(win), noverlap=overlap_length, nfft=NFFT, fs=fs, boundary=None, padded=False)
+    # X = np.repeat(X, 2, axis=1)  # Repeat X to have 6 bands
     X = np.multiply(X, RCF.T)
-    _, y_frame = signal.istft(X, window=win, nperseg=len(win), noverlap=overlap_length, nfft=NFFT, fs=fs, boundary=True)
+    _, y_frame = signal.istft(X, window=win, nperseg=len(win), noverlap=overlap_length, nfft=NFFT, fs=fs, boundary=None)
     y_frame = y_frame[:frameLength]  # Trim to frame length
     y[(index) * frameLength : (index + 1) * frameLength, :] = np.expand_dims(y_frame, axis=1)
 
@@ -413,14 +416,15 @@ for k in range(len(TFHist)):
 y = np.multiply(y, W)
 ip = np.sum(y, 1)
 print('ip=', ip)
-valid_values = np.abs(ip)[~np.isnan(ip)]  # Exclude NaN values from np.abs(ip)
-if valid_values.size > 0:
-    max_abs_ip = np.max(valid_values)
-else:
-    max_abs_ip = 1.0  # Set a default value if all values are NaN
-print('max_abs_ip=', max_abs_ip)
-if max_abs_ip == 0:
-    max_abs_ip = 1e-6  # Set a small non-zero value
+# valid_values = np.abs(ip)[~np.isnan(ip)]  # Exclude NaN values from np.abs(ip)
+# if valid_values.size > 0:
+#     max_abs_ip = np.max(valid_values)
+# else:
+#     max_abs_ip = 1.0  # Set a default value if all values are NaN
+# print('max_abs_ip=', max_abs_ip)
+# if max_abs_ip == 0:
+#     max_abs_ip = 1e-6  # Set a small non-zero value
+max_abs_ip = np.max(np.abs(ip))
 ip = np.divide(ip, max_abs_ip)
 print('ip=', ip)
 
