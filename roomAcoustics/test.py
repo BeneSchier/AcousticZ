@@ -150,7 +150,7 @@ r = 0.0875
 
 # Generate Random Rays
 
-N = 50
+N = 5000
 rays = RandSampleSphere(N)
 print(np.shape(rays))
 # print(np.array(rays).shape)
@@ -396,7 +396,7 @@ impTimes = (1 / fs) * np.arange(y.size)
 # Compute the times corresponding to the histogram bins
 hisTimes = histTimeStep / 2 + histTimeStep + np.arange(nTBins)
 
-W = np.zeros([impTimes.size, np.prod(FVect.size)])
+W = np.zeros((y.shape[0], y.shape[1]))
 BW = fhigh - flow
 for k in range(len(TFHist)):
     gk0 = int(np.floor((k-1) * fs * histTimeStep) + 1)
@@ -412,11 +412,23 @@ for k in range(len(TFHist)):
 # Create the impulse response
 y = np.multiply(y, W)
 ip = np.sum(y, 1)
-ip = np.divide(ip, np.max(np.abs(ip)))
+print('ip=', ip)
+valid_values = np.abs(ip)[~np.isnan(ip)]  # Exclude NaN values from np.abs(ip)
+if valid_values.size > 0:
+    max_abs_ip = np.max(valid_values)
+else:
+    max_abs_ip = 1.0  # Set a default value if all values are NaN
+print('max_abs_ip=', max_abs_ip)
+if max_abs_ip == 0:
+    max_abs_ip = 1e-6  # Set a small non-zero value
+ip = np.divide(ip, max_abs_ip)
+print('ip=', ip)
+
 
 # Plotting
 plt.figure()
-plt.plot((1 / fs) * np.arrange(np.prod(ip.size)-1), ip)
+
+plt.plot((1 / fs) * np.arange(np.prod(ip.size)), ip)
 plt.grid(True)
 plt.xlabel("Time (s)")
 plt.ylabel("Impulse Response")
