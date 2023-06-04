@@ -151,7 +151,7 @@ r = 0.0875
 
 # Generate Random Rays
 
-N = 5000
+N = 50
 np.random.seed(0)
 rays = RandSampleSphere(N)
 print(np.shape(rays))
@@ -359,82 +359,65 @@ fhigh = np.array([135, 275, 550, 1100, 2200, 4400])
 
 NFFT = 8192
 
-win = scipy.signal.windows.hann(882)
+win = scipy.signal.windows.hann(882, sym=True)
+#sfft = signal.stft(window=win, nperseg=len(win), noverlap=441, nfft=NFFT, fs=fs, boundary='zeros')
+# isfft = signal.istft(window=win, nperseg=len(win), noverlap=441, nfft=NFFT, fs=fs, boundary='zeros')
+# F = sfft[0]
 overlap_length = 441
 # F, t, sfft = signal.stft(win, window=win, nperseg=len(win), noverlap=overlap_length, nfft=nfft, fs=fs, boundary='zeros')
 # isfft = ifft(win)
 F = np.linspace(0, fs/2, NFFT // 2 + 1)
 
 # Create bandpass filters
-RCF = np.zeros([len(FVect),NFFT // 2 + 1])
-for index0 in range(len(FVect)):
+frameLength = 441
+win = scipy.signal.windows.hann(frameLength, sym=True)
+
+F = np.linspace(0, fs/2, NFFT // 2 + 1)
+
+RCF = np.zeros([len(flow), len(F)])
+for index0 in range(len(flow)):
     for index in range(len(F)):
         f = F[index]
         if f < FVect[index0] and f >= flow[index0]:
             RCF[index0, index] = 0.5 * (1 + np.cos(2 * np.pi * f / FVect[index0]))
         if f < fhigh[index0] and f >= FVect[index0]:
-            RCF[index0, index] = 0.5 * (1 - np.cos(2 * np.pi * f / (FVect[index0] + 1)))          
+            RCF[index0, index] = 0.5 * (1 - np.cos(2 * np.pi * f / (FVect[index0] + 1)))
 
-# Filter poisson sequence through six bandpass filters
+# Filter the Poisson sequence through the six bandpass filters
 
-frameLength = 882
 numFrames = len(randSeq) // frameLength
-y = np.zeros([len(randSeq), 6])
+y = np.zeros([len(randSeq), len(flow)])
 for index in range(numFrames):
-    print('randSeq=', randSeq)
-    x = randSeq[(index) * frameLength : (index + 1) * frameLength]
-    # x = np.repeat(x, 2)
-    print('x = ', len(x))
-    _, _, X = signal.stft(x, window=win, nperseg=len(win), noverlap=overlap_length, nfft=NFFT, fs=fs, boundary=None, padded=False)
-    # X = np.repeat(X, 2, axis=1)  # Repeat X to have 6 bands
-    X = np.multiply(X, RCF.T)
-    _, y_frame = signal.istft(X, window=win, nperseg=len(win), noverlap=overlap_length, nfft=NFFT, fs=fs, boundary=None)
+    x = randSeq[(index) * frameLength: (index + 1) * frameLength]
+    _, _, X = scipy.signal.stft(x, window=win, nperseg=441, noverlap=220, nfft=NFFT, boundary=None)
+    X = X * RCF.T
+    _, y_frame = scipy.signal.istft(X, window=win, nperseg=441, noverlap=220, nfft=NFFT, boundary=None)
     y_frame = y_frame[:frameLength]  # Trim to frame length
-    y[(index) * frameLength : (index + 1) * frameLength, :] = np.expand_dims(y_frame, axis=1)
-
-# Compute the times corresponding to the impulse respnse samples
-impTimes = (1 / fs) * np.arange(y.size)
+    y[(index) * frameLength: (index + 1) * frameLength, :] = np.expand_dims(y_frame, axis=1)
 
 
-# Compute the times corresponding to the histogram bins
-hisTimes = histTimeStep / 2 + histTimeStep + np.arange(nTBins)
-
-W = np.zeros((y.shape[0], y.shape[1]))
+# Combine the filtered sequences
+impTimes = (1 / fs) * np.arange(y.shape[0])
+hisTimes = histTimeStep / 2 + histTimeStep * np.arange(nTBins)
+W = np.zeros((y.shape[0], len(FVect)))
 BW = fhigh - flow
-for k in range(len(TFHist)):
-    gk0 = int(np.floor((k-1) * fs * histTimeStep) + 1)
-    gk1 = int(np.floor(k * fs * histTimeStep))
-    yy = np.power(y[gk0 : gk1, :], 2)
-    val = np.divide(np.sqrt(TFHist[k,:]), np.multiply(np.sum(yy,0), np.sqrt(BW / (fs / 2))))
-    print('size of TFHist', len(TFHist))
-    print('size of W', len(W))
 
-    for iRay in range(gk0, gk1):
-        W[iRay, :] = val
+for k in range(TFHist.shape[0]):
+    gk0 = int(np.floor((k - 1) * fs * histTimeStep) + 1)
+    gk1 = int(np.floor(k * fs * histTimeStep))
+    yy = y[gk0 : gk1, :] ** 2
+    val = np.sqrt(TFHist[k, :] / np.sum(yy, axis=0)) * np.sqrt(BW / (fs / 2))
+    W[gk0:gk1, :] = val
 
 # Create the impulse response
-y = np.multiply(y, W)
-ip = np.sum(y, 1)
-print('ip=', ip)
-# valid_values = np.abs(ip)[~np.isnan(ip)]  # Exclude NaN values from np.abs(ip)
-# if valid_values.size > 0:
-#     max_abs_ip = np.max(valid_values)
-# else:
-#     max_abs_ip = 1.0  # Set a default value if all values are NaN
-# print('max_abs_ip=', max_abs_ip)
-# if max_abs_ip == 0:
-#     max_abs_ip = 1e-6  # Set a small non-zero value
-max_abs_ip = np.max(np.abs(ip))
-ip = np.divide(ip, max_abs_ip)
-print('ip=', ip)
-
+y = y * W
+ip = np.sum(y, axis=1)
+ip = ip / np.max(np.abs(ip))
 
 # Plotting
 plt.figure()
-
-plt.plot((1 / fs) * np.arange(np.prod(ip.size)), ip)
+plt.plot(impTimes, ip)
 plt.grid(True)
 plt.xlabel("Time (s)")
 plt.ylabel("Impulse Response")
 plt.show()
-
