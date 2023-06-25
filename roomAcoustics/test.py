@@ -8,7 +8,7 @@ from scipy.signal import hann
 from scipy.fft import fft, ifft
 from tqdm import tqdm
 
-def plot_room(roomDimensions, receiverCoord, sourceCoord):
+def plot_room(roomDimensions, receiverCoord, sourceCoord, tracePoints):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
@@ -35,6 +35,14 @@ def plot_room(roomDimensions, receiverCoord, sourceCoord):
 
     ax.plot3D(X, Y, Z, 'ro-')
     ax.plot3D(X, Y, Z+roomDimensions[2], 'ro-')
+    
+    # plot ray lines
+    for i in range(len(tracePoints) - 1):
+      ax.plot(
+        [tracePoints[i][0], tracePoints[i + 1][0]],
+        [tracePoints[i][1], tracePoints[i + 1][1]],
+        [tracePoints[i][2], tracePoints[i + 1][2]], color = 'blue'
+    )
     
     for k in range(X.shape[0]):
         ax.plot3D([X[k], X[k]], [Y[k], Y[k]], [0, roomDimensions[2]], 'ro-')
@@ -151,7 +159,7 @@ r = 0.0875
 
 # Generate Random Rays
 
-N = 50
+N = 1
 np.random.seed(0)
 rays = RandSampleSphere(N)
 print(np.shape(rays))
@@ -190,8 +198,11 @@ TFHist = np.zeros([int(nTBins)+1, int(nFBins)]) # hier sollte eig die +1 nicht s
 
 # Perform Ray Tracing
 
+
+tracePoints = []
 # outer for loops iterates over frequencies
-for iBand in tqdm(range(nFBins)):
+#for iBand in tqdm(range(nFBins)):
+for iBand in range(1):
     # inner for loop iterates over rays (independant, we can paralleliize this shit)
     for iRay in tqdm(range(len(rays))):
         # print(rays)
@@ -199,6 +210,7 @@ for iBand in tqdm(range(nFBins)):
         # print(ray)
         # All rays start at the source
         ray_xyz = sourceCoord
+        tracePoints.append(ray_xyz)
         # set initial ray direction. this changes with every reflection of the ray
         ray_dxyz = ray
         # Initialize ray travel time, Ray Tracing is terminated when travel time exceeds impulse response length
@@ -217,7 +229,7 @@ for iBand in tqdm(range(nFBins)):
              
             # Determine coords of impact point
             impactCoord = ray_xyz + displacement
-            
+            tracePoints.append(impactCoord)
             # update ray location
             ray_xyz = impactCoord
             
@@ -300,6 +312,8 @@ for iBand in tqdm(range(nFBins)):
 # Calculate the x-axis values
 # x = histTimeStep * np.arange(TFHist.shape[0] * TFHist.shape[1])
 
+
+plot_room(roomDimensions, receiverCoord, sourceCoord, tracePoints)
 # Create the bar plot
 x = histTimeStep * np.arange(TFHist.shape[0]) # das sollte eig die Zeile darüber sein in der Theorie
 
@@ -415,9 +429,9 @@ ip = np.sum(y, axis=1)
 ip = ip / np.max(np.abs(ip))
 
 # Plotting
-plt.figure()
-plt.plot(impTimes, ip)
-plt.grid(True)
-plt.xlabel("Time (s)")
-plt.ylabel("Impulse Response")
-plt.show()
+# plt.figure()
+# plt.plot(impTimes, ip)
+# plt.grid(True)
+# plt.xlabel("Time (s)")
+# plt.ylabel("Impulse Response")
+# plt.show()
