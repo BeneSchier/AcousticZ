@@ -360,6 +360,7 @@ fhigh = np.array([135, 275, 550, 1100, 2200, 4400])
 NFFT = 8192
 
 win = scipy.signal.windows.hann(882, sym=True)
+#win = scipy.signal.windows.blackman(882)
 #sfft = signal.stft(window=win, nperseg=len(win), noverlap=441, nfft=NFFT, fs=fs, boundary='zeros')
 # isfft = signal.istft(window=win, nperseg=len(win), noverlap=441, nfft=NFFT, fs=fs, boundary='zeros')
 # F = sfft[0]
@@ -370,7 +371,7 @@ F = np.linspace(0, fs/2, NFFT // 2 + 1)
 
 # Create bandpass filters
 frameLength = 441
-win = scipy.signal.windows.hann(frameLength, sym=True)
+win = scipy.signal.windows.hann(2 * frameLength, sym=True)
 
 F = np.linspace(0, fs/2, NFFT // 2 + 1)
 
@@ -387,13 +388,51 @@ for index0 in range(len(flow)):
 
 numFrames = len(randSeq) // frameLength
 y = np.zeros([len(randSeq), len(flow)])
+# for index in range(numFrames):
+#     x = randSeq[(index) * frameLength+1: (index + 1) * frameLength]
+#     
+#     _, _, X = scipy.signal.stft(x, fs=fs, window=win, nperseg=441, noverlap=441, nfft=NFFT, boundary=None)
+#     # _, _, X = scipy.fft.fft(x , fs= fs, nperseg=441, noverlap=110, nfft=NFFT, boundary=None)
+#     
+#     X = X * RCF.T
+#     _, y_frame = scipy.signal.istft(X, fs=fs, window=win, nperseg=441, noverlap=441, nfft=NFFT, boundary=None)
+#     #_, y_frame = scipy.ifft(X, window=win, nperseg=441, noverlap=44, nfft=NFFT, boundary=None)
+#     
+#     y_frame = y_frame[:frameLength]  # Trim to frame length
+#     y[(index) * frameLength: (index + 1) * frameLength, :] = np.expand_dims(y_frame, axis=1)
+
+
+win_length = len(win)
+y = np.zeros((len(randSeq), 6))
+
 for index in range(numFrames):
-    x = randSeq[(index) * frameLength: (index + 1) * frameLength]
-    _, _, X = scipy.signal.stft(x, window=win, nperseg=441, noverlap=220, nfft=NFFT, boundary=None)
+    start_index = index * frameLength
+    end_index = (index + 1) * frameLength
+    
+    # Extract the current frame of the input sequence
+    x = randSeq[start_index:end_index]
+    
+    # Zero-padding if necessary
+    if len(x) < win_length:
+        pad_length = win_length - len(x)
+        x = np.pad(x, (0, pad_length), 'constant')
+    
+    # Compute STFT
+    _, _, X = scipy.signal.stft(x, fs=fs, window=win, nperseg=882, noverlap=441, nfft=NFFT, boundary=None)
     X = X * RCF.T
-    _, y_frame = scipy.signal.istft(X, window=win, nperseg=441, noverlap=220, nfft=NFFT, boundary=None)
+    
+    # Compute inverse STFT
+    _, y_frame = scipy.signal.istft(X, fs=fs, window=win, nperseg=882, noverlap=441, nfft=NFFT, boundary=None)
     y_frame = y_frame[:frameLength]  # Trim to frame length
-    y[(index) * frameLength: (index + 1) * frameLength, :] = np.expand_dims(y_frame, axis=1)
+    
+    # Store the frame in the output array
+    #y_frame = np.convolve(y_frame, np.ones(win_length) / win_length, mode='same')
+    y[start_index:end_index, :] = np.expand_dims(y_frame, axis=1)
+    #y[start_index:end_index, :] = y_frame
+    
+    print('shape of y:', np.shape(y))
+
+
 
 
 # Combine the filtered sequences
@@ -402,9 +441,9 @@ hisTimes = histTimeStep / 2 + histTimeStep * np.arange(nTBins)
 W = np.zeros((y.shape[0], len(FVect)))
 BW = fhigh - flow
 
-for k in range(TFHist.shape[0]):
-    gk0 = int(np.floor((k - 1) * fs * histTimeStep) + 1)
-    gk1 = int(np.floor(k * fs * histTimeStep))
+for k in range(TFHist.shape[0]-1):
+    gk0 = int(np.floor((k) * fs * histTimeStep) + 1)
+    gk1 = int(np.floor((k+1) * fs * histTimeStep))
     yy = y[gk0 : gk1, :] ** 2
     val = np.sqrt(TFHist[k, :] / np.sum(yy, axis=0)) * np.sqrt(BW / (fs / 2))
     W[gk0:gk1, :] = val
@@ -414,10 +453,19 @@ y = y * W
 ip = np.sum(y, axis=1)
 ip = ip / np.max(np.abs(ip))
 
+window_size = 5
+print('y=', y)
+# y = np.squeeze(y)
+#y_smooth = scipy.signal.convolve2d(y, np.ones([win_length, win_length]) / window_size, mode='same')indow_size = 5  # Adjust this parameter as needed
+y_smooth = scipy.signal.convolve2d(y, np.ones((window_size, 1)) / window_size, mode='same')
+y_smooth = y_smooth / np.max(np.abs(y_smooth))
 # Plotting
 plt.figure()
-plt.plot(impTimes, ip)
+plt.plot(impTimes, y_smooth)
 plt.grid(True)
 plt.xlabel("Time (s)")
 plt.ylabel("Impulse Response")
+
+# plt.xlim(x_min, x_max)
+plt.ylim(-1, 1)
 plt.show()
