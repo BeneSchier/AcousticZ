@@ -51,7 +51,6 @@ def plot_room(roomDimensions, receiverCoord, sourceCoord, tracePoints):
     ax.text(sourceCoord[0], sourceCoord[1], sourceCoord[2], 'source')
     ax.scatter(receiverCoord[0], receiverCoord[1], receiverCoord[2])
     ax.text(receiverCoord[0], receiverCoord[1], receiverCoord[2], 'receiver')
-    n = ['A', 'B', 'C', 'D', 'A', 'B', 'C', 'D']
    # for i, txt in enumerate(n):
    #     ax.text(X[i],Y[i], Z[i], txt)
    # ax.legend()
@@ -85,7 +84,9 @@ def RandSampleSphere(N):
     print('xyz:', np.shape([x,y,z]))
     return np.transpose([x,y,z])[0]
     
-def getImpactWall(ray_xyz, ray_dxyz, roomDims):
+
+# This function has to be replaced with functionalities of trimesh
+def getImpactWall(ray_xyz, ray_dxyz, roomDims): 
     surfaceofimpact = -1
     displacement = 1000
     
@@ -128,7 +129,7 @@ def getImpactWall(ray_xyz, ray_dxyz, roomDims):
     
     return surfaceofimpact, displacement
     
-
+# This function has to be replaced with Trimesh functionalities
 def getWallNormalVector(surfaceofimact):
     match surfaceofimpact:
         case 0: 
@@ -150,6 +151,7 @@ def getWallNormalVector(surfaceofimact):
 roomDimensions = [10, 8, 4]
 receiverCoord = [5, 5, 1.8]
 sourceCoord = [2, 2, 2]
+
 # Treat receiver as a sphere with radius of 8,75cm
 r = 0.0875
 
