@@ -19,6 +19,7 @@ import sounddevice as sd
 from scipy.stats import poisson
 from scipy.fft import ifft
 import soundfile as sf
+import warnings
 
 
 
@@ -204,7 +205,7 @@ class Room:
     
     
     def getRoomVolume(self):
-            # Assuming you have a trimesh object called 'mesh'
+        # Assuming you have a trimesh object called 'mesh'
         vertices = self.room.vertices
 
         # Calculate minimum and maximum values for each dimension
@@ -294,7 +295,7 @@ class Room:
             # All rays start at the source                
             ray_xyz = np.zeros([len(rays), 3]) # MOVE THIS TO THE TOP
             ray_xyz[:, :] = self.sourceCoord
-            ray_time = np.zeros(len(rays)).astype(float)
+            
             receiverCoord = np.zeros([len(rays), 3])
             receiverCoord[:, :] = self.receiverCoord
             
@@ -303,7 +304,7 @@ class Room:
             ray_dxyz = rays
             
             # Initialize ray travel time, Ray Tracing is terminated when travel time exceeds impulse response length
-            #ray_time = 0
+            ray_time = np.zeros(len(rays)).astype(float)
             
             
             # Initialize energy to 1, it descreses every time the ray hits a wall
@@ -341,8 +342,7 @@ class Room:
                 indexOfFace, ray_index, target = ray_room_intersector.intersects_id(ray_xyz_corr, ray_dxyz, multiple_hits=False, return_locations=True)
                 
                 #ray_visualize_scene.add_geometry(trimesh.load_path(np.hstack((ray_xyz[:, np.newaxis], target[:, np.newaxis])).reshape(-1, 2, 3), width=0.001))
-                #print(np.all(sucess_index == ray_index))
-                # print('rays with no target: ', len(ray_xyz_corr) - len(ray_index))
+                
                 ray_xyz = ray_xyz[ray_index]
                 ray_dxyz = ray_dxyz[ray_index]
                 ray_time = ray_time[ray_index]
@@ -413,9 +413,6 @@ class Room:
                 # amount of energy that gets directly to the receiver
                 rayrecv_energy = ray_energy * (D[0, iBand])
                 
-                # NOTE At this point it gets a bit weird and I am not sure if this is correct
-                # NOTE It should be correct tho 
-                
                 rayrecvvector = receiverCoord - impactCoord
         
                 # ray's time of arrival at receiver if it would take the shortest path
@@ -466,7 +463,7 @@ class Room:
                 # d = d[no_hit]
                 # ray_dxyz = ray_dxyz[no_hit]
                 # ray_xyz = ray_xyz[no_hit]
-                # indexOfFace = indexOfFace[no_hit]
+                indexOfFace = indexOfFace[no_hit]
                 cosTheta = np.sum(np.abs(rayrecvvector * N), axis=1) / (np.sqrt(np.sum(rayrecvvector ** 2, axis=1)))
                 cosAlpha = np.sqrt(np.sum(rayrecvvector ** 2, axis=1) - r ** 2) / np.sum(np.power(rayrecvvector, 2), axis=1)
                 E = (1 - cosAlpha) * 2 * cosTheta * rayrecv_energy
@@ -495,17 +492,15 @@ class Room:
                     #d = -d
         
                 # specular reflection
-                # print('ensure normalized incident ray')
-                # print(np.linalg.norm(ray_dxyz, axis=1))
                 ref = ray_dxyz - 2.0 * (np.sum(ray_dxyz * N, axis=1)[:, np.newaxis]) * np.double(N)
                 # combine specular and random components
                 d = d / np.linalg.norm(d, axis=1)[:, np.newaxis]
-                #print('ref = ', ref)
+
                 ref = ref / np.linalg.norm(ref, axis=1)[:, np.newaxis]
-                # ray_dxyz = D[surfaceofimpact, iBand] * d + (1 - D[surfaceofimpact, iBand]) * ref
+
                 
                 ray_dxyz_old = ray_dxyz
-                ray_dxyz = D[0, iBand] * d + (1 - D[0, iBand]) * ref #NOTE: Change to this later
+                ray_dxyz = D[0, iBand] * d + (1 - D[0, iBand]) * ref 
                 # ray_dxyz = (1 - D[0, iBand]) * ref
                 
                 #ray_dxyz = 0.2 * d + (1 - 0.2) * ref
@@ -556,95 +551,95 @@ class Room:
                 # hit_index = np.where(hit)[0]
                 # non_hit_index = np.where(not hit)[0]
                 
-                # if(np.any(hit)):
-                #     print('Rays that hit the receiver')
-                #     print(len(hit_index))
-                #     hit_rayrecvvector = receiverCoord[hit_index] - impactCoord[hit_index]
-                #     hit_distance = np.linalg.norm(hit_rayrecvvector, axis=1)
-                #     hit_recv_timeofarrival = ray_time[hit_index] + hit_distance / c
-                #     hit_energy = ray_energy[hit_index]
-                #     hit_ray_dxyz = ray_dxyz[hit_index]
-                #     hit_indexOfFace = indexOfFace[hit_index]
-                #     hit_receiverCoord = receiverCoord[hit_index]
-                #     hit_ray_xyz = ray_xyz[hit_index]
-                #     hit_ray_dxyz_old = ray_dxyz_old[hit_index]
-                #     N = N[hit_index]
-                #     theta = theta[hit_index]
-                #     rayrecv_energy = hit_energy * D[0, iBand]
-                #     
-                #     
-                #     # determine rays that are in our time window
-                #     non_skippable_index = np.where(hit_recv_timeofarrival <= self.imResTime)[0]
-                #     hit_rayrecvvector = hit_rayrecvvector[non_skippable_index]
-                #     hit_recv_timeofarrival = hit_recv_timeofarrival[non_skippable_index]
-                #     hit_energy = hit_energy[non_skippable_index]
-                #     hit_distance = hit_distance[non_skippable_index]
-                #     hit_ray_dxyz = hit_ray_dxyz[non_skippable_index]
-                #     hit_indexOfFace = hit_indexOfFace[non_skippable_index]
-                #     hit_receiverCoord = hit_receiverCoord[non_skippable_index]
-                #     hit_ray_xyz = hit_ray_xyz[non_skippable_index]
-                #     hit_ray_dxyz_old = hit_ray_dxyz_old[non_skippable_index]
-                #     N = N[non_skippable_index]
-                #     theta = theta[non_skippable_index]
-                #     # hit_index = hit_index[non_skippable_index]
-                #     
-                #     
-                #     
-                #     
-                #     # N = self.room.face_normals[hit_indexOfFace]
-                #     # theta = angle_between_vectors(hit_ray_dxyz, N)
-                #     #gamma = calculate_opening_angle(hit_ray_xyz, hit_ray_dxyz, r, hit_receiverCoord)
-                #     r = self.radiusOfReceiver
-                #     gamma = 2 * np.arcsin(r / hit_distance)
-                #     #print(hit_energy)
-                #     #print('theta = ', theta * 180/np.pi)
-                #     if(np.any(theta * 180/np.pi > 90)):
-                #         # raise ValueError('reflection angle has unphysical values')
-                #         print('reflection angle has unphysical values')
-                #         print(theta * 180/np.pi)
-                #         # #error_plot = trimesh.Scene()
-                #         # invalid_index = np.where(theta * 180/np.pi > 90)[0]
-                #         # normals = trimesh.load_path((np.hstack((hit_ray_xyz[invalid_index], hit_ray_xyz[invalid_index] + 0.1 * N[invalid_index])).reshape(-1, 2, 3)))
-                #         # N[invalid_index] *= -1.0
-                #         # error_plot = trimesh.Scene()
-                #         # error_plot = trimesh.Scene([self.room, normals])
-                #         # normals = trimesh.load_path((np.hstack((hit_ray_xyz[invalid_index], hit_ray_xyz[invalid_index] + 0.1 * N[invalid_index])).reshape(-1, 2, 3)))
-                #         # print('fixed theta (?): ', angle_between_vectors(hit_ray_dxyz[invalid_index], self.room.face_normals[invalid_index]) * 180/np.pi)
-                #         # error_plot = trimesh.Scene([self.room, normals])
-                #         
-                #         
-                #         
-                #         # error_plot.show()
-                #         # break
-                #     m = 0.001
-                #     # if(np.all(theta * 180/np.pi <= 90)):
-                #     #     print('all good!')
-                #     # else:
-                #     #     raise ValueError('meh')
-                #     physical_valid_index = np.where(theta * 180/np.pi <= 90)[0]
-                #     theta = theta[physical_valid_index]
-                #     gamma = gamma[physical_valid_index]
-                #     hit_energy = hit_energy[physical_valid_index]
-                #     hit_recv_timeofarrival = hit_recv_timeofarrival[physical_valid_index]
-# 
-                #     # # 
-                #     # E = (1 - cosAlpha) * 2 * cosTheta * hit_energy
-                #     # ray_energy_reflected = (1 - R[0, iBand]) * hit_energy
-                #     
-                #     print('hit_energy = ', hit_energy)
-                #     print('reduction factor1 = ', 2 * np.cos(theta))
-                #     print('reduction factor2 = ', (1 - np.cos(gamma / 2)))
-                #     print('E = ', E)
-                #     
-                #     #print('First energy term')
-                #     #print((1 - np.cos(gamma / 2)))
-                #     #print('Second energy term')
-                #     #print(2 * np.cos(theta))
-                #     tbin = np.floor(hit_recv_timeofarrival / self.histTimeStep + 0.5)
-                #     self.TFHist[tbin.astype(int),iBand] = self.TFHist[tbin.astype(int),iBand] + hit_energy
-                #     no_hit_counter = 0
+                if(np.any(hit)):
+                    print('Rays that hit the receiver')
+                    print(len(hit_index))
+                    hit_rayrecvvector = receiverCoord[hit_index] - impactCoord[hit_index]
+                    hit_distance = np.linalg.norm(hit_rayrecvvector, axis=1)
+                    hit_recv_timeofarrival = ray_time[hit_index] + hit_distance / c
+                    hit_energy = ray_energy[hit_index]
+                    hit_ray_dxyz = ray_dxyz[hit_index]
+                    hit_indexOfFace = indexOfFace[hit_index]
+                    hit_receiverCoord = receiverCoord[hit_index]
+                    hit_ray_xyz = ray_xyz[hit_index]
+                    hit_ray_dxyz_old = ray_dxyz_old[hit_index]
+                    N = N[hit_index]
+                    theta = theta[hit_index]
+                    rayrecv_energy = hit_energy * D[0, iBand]
+                    
+                    
+                    # determine rays that are in our time window
+                    non_skippable_index = np.where(hit_recv_timeofarrival <= self.imResTime)[0]
+                    hit_rayrecvvector = hit_rayrecvvector[non_skippable_index]
+                    hit_recv_timeofarrival = hit_recv_timeofarrival[non_skippable_index]
+                    hit_energy = hit_energy[non_skippable_index]
+                    hit_distance = hit_distance[non_skippable_index]
+                    hit_ray_dxyz = hit_ray_dxyz[non_skippable_index]
+                    hit_indexOfFace = hit_indexOfFace[non_skippable_index]
+                    hit_receiverCoord = hit_receiverCoord[non_skippable_index]
+                    hit_ray_xyz = hit_ray_xyz[non_skippable_index]
+                    hit_ray_dxyz_old = hit_ray_dxyz_old[non_skippable_index]
+                    N = N[non_skippable_index]
+                    theta = theta[non_skippable_index]
+                    # hit_index = hit_index[non_skippable_index]
+                    
+                    
+                    
+                    
+                    # N = self.room.face_normals[hit_indexOfFace]
+                    # theta = angle_between_vectors(hit_ray_dxyz, N)
+                    #gamma = calculate_opening_angle(hit_ray_xyz, hit_ray_dxyz, r, hit_receiverCoord)
+                    r = self.radiusOfReceiver
+                    gamma = 2 * np.arcsin(r / hit_distance)
+                    #print(hit_energy)
+                    #print('theta = ', theta * 180/np.pi)
+                    if(np.any(theta * 180/np.pi > 90)):
+                        # raise ValueError('reflection angle has unphysical values')
+                        print('reflection angle has unphysical values')
+                        print(theta * 180/np.pi)
+                        # #error_plot = trimesh.Scene()
+                        # invalid_index = np.where(theta * 180/np.pi > 90)[0]
+                        # normals = trimesh.load_path((np.hstack((hit_ray_xyz[invalid_index], hit_ray_xyz[invalid_index] + 0.1 * N[invalid_index])).reshape(-1, 2, 3)))
+                        # N[invalid_index] *= -1.0
+                        # error_plot = trimesh.Scene()
+                        # error_plot = trimesh.Scene([self.room, normals])
+                        # normals = trimesh.load_path((np.hstack((hit_ray_xyz[invalid_index], hit_ray_xyz[invalid_index] + 0.1 * N[invalid_index])).reshape(-1, 2, 3)))
+                        # print('fixed theta (?): ', angle_between_vectors(hit_ray_dxyz[invalid_index], self.room.face_normals[invalid_index]) * 180/np.pi)
+                        # error_plot = trimesh.Scene([self.room, normals])
+                        
+                        
+                        
+                        # error_plot.show()
+                        # break
+                    m = 0.001
+                    # if(np.all(theta * 180/np.pi <= 90)):
+                    #     print('all good!')
+                    # else:
+                    #     raise ValueError('meh')
+                    physical_valid_index = np.where(theta * 180/np.pi <= 90)[0]
+                    theta = theta[physical_valid_index]
+                    gamma = gamma[physical_valid_index]
+                    hit_energy = hit_energy[physical_valid_index]
+                    hit_recv_timeofarrival = hit_recv_timeofarrival[physical_valid_index]
+
+                    # # 
+                    # E = (1 - cosAlpha) * 2 * cosTheta * hit_energy
+                    # ray_energy_reflected = (1 - R[0, iBand]) * hit_energy
+                    
+                    print('hit_energy = ', hit_energy)
+                    print('reduction factor1 = ', 2 * np.cos(theta))
+                    print('reduction factor2 = ', (1 - np.cos(gamma / 2)))
+                    print('E = ', E)
+                    
+                    #print('First energy term')
+                    #print((1 - np.cos(gamma / 2)))
+                    #print('Second energy term')
+                    #print(2 * np.cos(theta))
+                    tbin = np.floor(hit_recv_timeofarrival / self.histTimeStep + 0.5)
+                    self.TFHist[tbin.astype(int),iBand] = self.TFHist[tbin.astype(int),iBand] + hit_energy
+                    no_hit_counter = 0
                 # 
-                # else: no_hit_counter += 1    
+                else: no_hit_counter += 1    
                 rayrecvvector = rayrecvvector[no_hit]
                 rayrecv_energy = rayrecv_energy[no_hit]
                 N = N[no_hit]
@@ -656,21 +651,21 @@ class Room:
                 indexOfFace = indexOfFace[no_hit]
                 indexOfFace_old = indexOfFace[no_hit]
                 
-                cosTheta = np.sum(np.abs(rayrecvvector * N), axis=1) / (np.sqrt(np.sum(rayrecvvector ** 2, axis=1)))
-                cosAlpha = np.sqrt(np.sum(rayrecvvector ** 2, axis=1) - r ** 2) / np.sum(np.power(rayrecvvector, 2), axis=1)
-                E = (1 - cosAlpha) * 2 * cosTheta * rayrecv_energy
-                if(np.any(E < 0)):
-                    raise ValueError('Histogram energy < 0')
-                if(np.any(np.isnan(E))):
-                    print(np.any(np.sum(np.power(rayrecvvector, 2), axis=1) < 1e-06))
-                    raise ValueError('nan found')
-                # E = 2 * cosTheta * rayrecv_energy
-                # # updtae historgram
-                tbin = np.floor(recv_timeofarrival / self.histTimeStep + 0.5)
-                # #tbin = np.floor(recv_timeofarrival / self.histTimeStep)
-                
-                # add calculated energy to the corresponding histogram bin
-                self.TFHist[tbin.astype(int),iBand] = self.TFHist[tbin.astype(int),iBand] + E
+                #cosTheta = np.sum(np.abs(rayrecvvector * N), axis=1) / (np.sqrt(np.sum(rayrecvvector ** 2, axis=1)))
+                #cosAlpha = np.sqrt(np.sum(rayrecvvector ** 2, axis=1) - r ** 2) / np.sum(np.power(rayrecvvector, 2), axis=1)
+                #E = (1 - cosAlpha) * 2 * cosTheta * rayrecv_energy
+                #if(np.any(E < 0)):
+                #    raise ValueError('Histogram energy < 0')
+                #if(np.any(np.isnan(E))):
+                #    print(np.any(np.sum(np.power(rayrecvvector, 2), axis=1) < 1e-06))
+                #    raise ValueError('nan found')
+                ## E = 2 * cosTheta * rayrecv_energy
+                ## # updtae historgram
+                #tbin = np.floor(recv_timeofarrival / self.histTimeStep + 0.5)
+                ## #tbin = np.floor(recv_timeofarrival / self.histTimeStep)
+                #
+                ## add calculated energy to the corresponding histogram bin
+                #self.TFHist[tbin.astype(int),iBand] = self.TFHist[tbin.astype(int),iBand] + E
                 
                 
                 #rayrecvvector = rayrecvvector[mask]
