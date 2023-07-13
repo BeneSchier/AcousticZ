@@ -1,5 +1,5 @@
 import numpy as np
-from Helper.angle_between_vectors import angle_between_vectors
+from AcousticZ.Helper.angle_between_vectors import angle_between_vectors
 def calculate_opening_angle(ray_xyz, ray_dxyz, radius, receiverCoord):
     
     # Generate a random vector to compute the cross product

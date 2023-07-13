@@ -8,9 +8,10 @@ import soundfile as sf
 # import warnings
 import time
 
+
 from tqdm import tqdm
-from Helper.angle_between_vectors import angle_between_vectors
-from Helper.calculate_opening_angle import calculate_opening_angle
+from AcousticZ.Helper.angle_between_vectors import angle_between_vectors
+from AcousticZ.Helper.calculate_opening_angle import calculate_opening_angle
 # from scipy.stats import poisson
 # from scipy.fft import ifft
 
@@ -22,7 +23,8 @@ class Room:
     that are needed to generate a RIR for a given room is stored inside this 
     class.
     """
-    def __init__(self, filepath, numberOfRays, FVect, absorptionCoefficients,
+    def __init__(self, filepath: str, numberOfRays: int,
+                 FVect: np.ndarray[int], absorptionCoefficients,
                  scatteringCoefficients):
         """__init__ The constructor for the Room class
 
