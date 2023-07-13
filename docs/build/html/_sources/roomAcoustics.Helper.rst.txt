@@ -1,0 +1,29 @@
+roomAcoustics.Helper package
+============================
+
+Submodules
+----------
+
+roomAcoustics.Helper.angle\_between\_vectors module
+---------------------------------------------------
+
+.. automodule:: roomAcoustics.Helper.angle_between_vectors
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+roomAcoustics.Helper.calculate\_opening\_angle module
+-----------------------------------------------------
+
+.. automodule:: roomAcoustics.Helper.calculate_opening_angle
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: roomAcoustics.Helper
+   :members:
+   :undoc-members:
+   :show-inheritance:
