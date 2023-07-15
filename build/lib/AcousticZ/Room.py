@@ -5,13 +5,13 @@ import matplotlib.pyplot as plt
 import trimesh
 import soundfile as sf
 # import sounddevice as sd
-# import warnings
+import warnings
 import time
 
 
 from tqdm import tqdm
 from AcousticZ.Helper.angle_between_vectors import angle_between_vectors
-from AcousticZ.Helper.calculate_opening_angle import calculate_opening_angle
+
 # from scipy.stats import poisson
 # from scipy.fft import ifft
 
@@ -44,11 +44,12 @@ class Room:
             _description_
         scatteringCoefficients : _type_
             _description_
-        """        
+        """      
         self.room_file = filepath
-        print('before loading mesh')
+        
         self.room = trimesh.load(self.room_file, force='mesh')
-        print('is watertight?', self.room.is_watertight)
+        if not self.room.is_watertight:
+            warnings.warn('room is not watertight: possibility of "escaping" rays')
         self.min_bound, self.max_bound = self.room.bounds
         self.roomDimensions = self.max_bound - self.min_bound
         self.numberOfRays = numberOfRays
@@ -66,17 +67,52 @@ class Room:
         self.TFHist = np.zeros([int(self.nTBins) + 1, int(self.nFBins)])
         # self.TFHist = np.zeros([100000, int(self.nFBins)])
 
-    def isPointInsideMesh(self, point):
+    def isPointInsideMesh(self, point: np.ndarray[float]):
+        """isPointInsideMesh check if a 3D point is inside the room
 
+        This function checks if a point is inside the room geometry
+
+        Parameters
+        ----------
+        point : np.ndarray[float]
+            The point that gets checked
+
+        Returns
+        -------
+        bool
+            boolean value
+        """
         # Perform the point-in-mesh test using ray casting
         intersections = self.room.ray.intersects_location(
             [point], [np.array([0, 0, 1])])  # Cast a ray along the z-axis
         # If the number of intersections is odd, the point is inside
+        print('intersections = ', intersections)
+        for intersection in intersections:
+            if len(intersection) == 0:
+                return False
+        
+                
         is_inside = len(intersections) % 2 == 1
-
+        print('is inside? ', is_inside)
         return is_inside
 
     def RandSampleSphere(self, N):
+        """RandSampleSphere Generate a number of random 3D directions that point 
+        in all directions (spherical shape)
+
+        This function is needed to initialize the rays first direction. It does 
+        does that by generating a specified number of random directions.
+
+        Parameters
+        ----------
+        N : int
+            number of Rays/Directions
+
+        Returns
+        -------
+        np.ndarray[float]
+            Nx3 array with all the directions
+        """      
         # Sample unfolded right cylinder
         z = 2 * np.random.rand(N, 1) - 1
         lon = 2 * np.pi * np.random.rand(N, 1)
@@ -93,12 +129,30 @@ class Room:
 
     def createReceiver(self, receiver=np.array(
             [5, 2, 1.3]), radiusOfReceiverSphere=1.0):
+        """createReceiver Create the receiver sphere
+
+        function that creates the receiver sphere at which the energy of all the
+        rays gets evaluated.
+
+        Parameters
+        ----------
+        receiver : np.ndarray, optional
+            Coordinates of the center of the receiver sphere, by default 
+            np.array( [5, 2, 1.3])
+        radiusOfReceiverSphere : float, optional
+            radius of the receiver Sphere, by default 1.0
+
+        Raises
+        ------
+        ValueError
+            If a center point is specified that is not inside the mesh
+        """      
+        
         if self.isPointInsideMesh(receiver):
             self.receiverCoord = receiver
 
         else:
-            print('point not in Mesh!')
-            return
+            raise ValueError('specified Receiver is not inside the mesh')
 
         self.receiverSphere = trimesh.primitives.Sphere(
             radius=radiusOfReceiverSphere, center=receiver)
@@ -172,6 +226,8 @@ class Room:
         # das sollte eig die Zeile darüber sein in der Theorie
         x = self.histTimeStep * np.arange(self.TFHist.shape[0])
 
+        if np.all(self.TFHist == 0):
+            warnings.warn('Histogram is empty')
         # Create the bar plot
         plt.figure()
         for i in range(self.TFHist.shape[1]):
@@ -187,8 +243,8 @@ class Room:
             collected ray energies
 
         Raises:
-            ValueError: If the between face normal and reflected ray is greater
-            than 90 degrees
+            ValueError: If the angle between face normal and reflected ray is 
+            greater than 90 degrees
         """
 
         np.random.seed(0)
@@ -252,7 +308,7 @@ class Room:
                 indexOfFace, ray_index, target = \
                     ray_room_intersector.intersects_id(
                         ray_xyz_corr, ray_dxyz, multiple_hits=False,
-                            return_locations=True)
+                        return_locations=True)
 
                 # ray_visualize_scene.add_geometry(trimesh.load_path(np.hstack((ray_xyz[:, np.newaxis], target[:, np.newaxis])).reshape(-1, 2, 3), width=0.001))
 
@@ -607,7 +663,7 @@ class Room:
 
     def applyRIR(self):
         fs, audioIn = scipy.io.wavfile.read(
-            "C:/Users/Benes/Documents/Git/roomAcoustics/roomAcoustics/roomAcoustics/funnyantonia.wav")
+            "C:/Users/Benes/Documents/Git/roomAcoustics/AcousticZ/AcousticZ/funnyantonia.wav")
         # audioIn = audioIn[:, 0]
 
         # audioOut = scipy.signal.lfilter(self.ip, 1, audioIn)
@@ -615,7 +671,7 @@ class Room:
         audioOut = np.real(audioOut)
         audioOut = audioOut / np.max(audioOut)
 #
-        sf.write("processed_audio.wav", audioOut, fs)
+        sf.write("./processed_audio.wav", audioOut, fs)
         # sd.play(audioIn[:T*fs], fs)
         # sd.wait(T)
         # sd.play(audioOut[:T*fs], fs)
@@ -653,10 +709,12 @@ class Room:
             t = t + deltaTA
 
         # Create random process sampled at the specified sample rate
-        randSeq = np.zeros(int(np.ceil(self.imResTime * fs)))
+        randSeq = np.zeros(int(np.ceil(self.imResTime * fs)) + 1)
 
         for index in range(len(timeValues)):
             # print('size of randSeq', randSeq.size)
+            if (timeValues[index] > self.imResTime):
+                raise ValueError('time Values sequence exceeds impulse time')
             randSeq[int(np.round(timeValues[index] * fs))] = poissonProcess[index]
 
         # print('poissonProcess=', poissonProcess)
@@ -699,7 +757,7 @@ class Room:
         numFrames = len(randSeq) // frameLength
         y = np.zeros([len(randSeq), len(flow)])
         win_length = len(win)
-        numFrames = len(randSeq) //win_length
+        numFrames = len(randSeq) // win_length
         y = np.zeros((len(randSeq), 6))
 
         for index in range(numFrames):
@@ -733,7 +791,7 @@ class Room:
         # Combine the filtered sequences
         impTimes = (1 / fs) * np.arange(y.shape[0])
         hisTimes = self.histTimeStep / 2 + \
-        self.histTimeStep * np.arange(self.nTBins)
+            self.histTimeStep * np.arange(self.nTBins)
         W = np.zeros((y.shape[0], len(FVect)))
         BW = fhigh - flow
 
@@ -741,7 +799,7 @@ class Room:
             gk0 = int(np.floor((k) * fs * self.histTimeStep) + 1)
             gk1 = int(np.floor((k + 1) * fs * self.histTimeStep))
             yy = y[gk0: gk1, :] ** 2
-            if (np.all(np.sum(y[gk0: gk1, :])==0)):
+            if (np.all(np.sum(y[gk0: gk1, :]) == 0)):
                 continue
             val = np.sqrt(self.TFHist[k, :] / np.sum(yy, axis=0)) * np.sqrt(BW / (fs / 2))
             W[gk0:gk1, :] = val
@@ -887,14 +945,15 @@ D = np.array([[0.05, 0.3, 0.7, 0.9, 0.92, 0.94],
               [0.01, 0.05, 0.1, 0.2, 0.3, 0.5]])
 
 if __name__ == '__main__':
-    r = Room(room_file, numberOfRays=100, absorptionCoefficients=A,
+    r = Room(room_file, numberOfRays=10, absorptionCoefficients=A,
              scatteringCoefficients=D, FVect=FVect)
     print('created room')
 
-    #point = np.array([2, 2, 1.3])
+    # point = np.array([2, 2, 1.3])
     point1 = np.array([2.0, 2.0, 2.0])
+    # point2 = np.array([5.0, 5.0, 1.8])
     point2 = np.array([5.0, 5.0, 1.8])
-
+    print(r.isPointInsideMesh(point2))
     r.createReceiver(point2, 0.0875)
     r.createSource(point1)
     print(r.min_bound, r.max_bound)

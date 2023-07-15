@@ -11,3 +11,6 @@ AcousticZ.egg-info/top_level.txt
 AcousticZ/Helper/__init__.py
 AcousticZ/Helper/angle_between_vectors.py
 AcousticZ/Helper/calculate_opening_angle.py
+tests/test_Helper.py
+tests/test_completeWorkflow.py
+tests/test_room.py

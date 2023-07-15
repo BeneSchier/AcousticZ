@@ -10,7 +10,8 @@ Welcome to AcousticZ's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   modules
+   Introduction
+   AcousticZ
 
 Indices and tables
 ==================
