@@ -661,9 +661,8 @@ class Room:
             [self.room, ray_visualize_scene, self.receiverSphere])
         scene.show()
 
-    def applyRIR(self):
-        fs, audioIn = scipy.io.wavfile.read(
-            "C:/Users/Benes/Documents/Git/roomAcoustics/AcousticZ/AcousticZ/funnyantonia.wav")
+    def applyRIR(self, audio_file):
+        fs, audioIn = scipy.io.wavfile.read(audio_file)
         # audioIn = audioIn[:, 0]
 
         # audioOut = scipy.signal.lfilter(self.ip, 1, audioIn)
@@ -922,7 +921,7 @@ class Room:
 #room_file = 'C:/Users/Benes/Documents/Git/roomAcoustics/roomAcoustics/Vaiko_2.obj'
 
 
-room_file = 'C:/Users/Benes/Documents/Git/roomAcoustics/roomAcoustics/shoebox.obj'
+room_file = 'C:/Users/Benes/Documents/Git/roomAcoustics/AcousticZ/data/example_meshes/shoebox.obj'
 
 
 FVect = np.array([125, 250, 500, 1000, 2000, 4000])
@@ -966,6 +965,7 @@ if __name__ == '__main__':
     # calculate_RIR(r.TFHist, 1, 1.0, 44100)
     r.generateRoomImpulseResponse()
     # r.generateRIR()
-    r.applyRIR()
+    
+    r.applyRIR('C:/Users/Benes/Documents/Git/roomAcoustics/AcousticZ/data/example_audio/funnyantonia.wav')
 
     print(r.roomDimensions)

@@ -1,4 +1,4 @@
-AcousticZ package
+API Reference
 =================
 
 Subpackages

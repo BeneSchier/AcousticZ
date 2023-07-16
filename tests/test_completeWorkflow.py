@@ -4,8 +4,10 @@ import os
 
 
 def test_completeWorkflow():
-    room_file = \
-        'C:/Users/Benes/Documents/Git/roomAcoustics/roomAcoustics/shoebox.obj'
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    shoebox_file_path = current_dir + '/../data/example_meshes/shoebox.obj'
+    
+    room_file = shoebox_file_path
     FVect = np.array([125, 250, 500, 1000, 2000, 4000])
     A = np.array([[0.08, 0.09, 0.12, 0.16, 0.22, 0.24],
                   [0.08, 0.09, 0.12, 0.16, 0.22, 0.24],
@@ -38,6 +40,7 @@ def test_completeWorkflow():
     
     assert (not np.any(np.isnan(room.ip)))
     
-    room.applyRIR()
+    audio_file = current_dir + '/../data/example_audio/funnyantonia.wav'
+    room.applyRIR(audio_file)
     
     assert (os.path.exists('./processed_audio.wav'))

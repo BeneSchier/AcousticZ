@@ -11,7 +11,11 @@ setup(
     url='https://github.com/BeneSchier/AcousticZ',
     packages=find_packages(),
     install_requires=[
-
+        'numpy',
+        'trimesh',
+        'scipy',
+        'soundfile',
+        'matplotlib',
         # List any additional dependencies your package requires
     ],
     classifiers=[

@@ -7,6 +7,7 @@ AcousticZ/__init__.py
 AcousticZ.egg-info/PKG-INFO
 AcousticZ.egg-info/SOURCES.txt
 AcousticZ.egg-info/dependency_links.txt
+AcousticZ.egg-info/requires.txt
 AcousticZ.egg-info/top_level.txt
 AcousticZ/Helper/__init__.py
 AcousticZ/Helper/angle_between_vectors.py

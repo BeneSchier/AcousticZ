@@ -11,7 +11,9 @@ Welcome to AcousticZ's documentation!
    :caption: Contents:
 
    Introduction
-   AcousticZ
+   Installation
+   GettingStarted
+   APIReference
 
 Indices and tables
 ==================

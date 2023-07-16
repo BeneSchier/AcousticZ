@@ -4,5 +4,5 @@ roomAcoustics
 .. toctree::
    :maxdepth: 4
 
-   AcousticZ
+   APIReference
 
