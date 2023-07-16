@@ -16,6 +16,7 @@ setup(
         'scipy',
         'soundfile',
         'matplotlib',
+        'tqdm',
         # List any additional dependencies your package requires
     ],
     classifiers=[
