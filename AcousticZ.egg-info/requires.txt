@@ -3,3 +3,4 @@ trimesh
 scipy
 soundfile
 matplotlib
+tqdm
