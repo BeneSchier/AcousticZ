@@ -10,6 +10,7 @@ setup(
     long_description_content_type='text/markdown',
     url='https://github.com/BeneSchier/AcousticZ',
     packages=find_packages(),
+    python_requires='>=3.11'
     install_requires=[
         'numpy==1.24.0',
         'trimesh',
