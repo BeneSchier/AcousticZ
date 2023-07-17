@@ -26,16 +26,16 @@ class Room:
                  np.array([125, 250, 500, 1000, 2000, 4000])):
         """__init__ The constructor for the Room class
 
-        All room characteristics and simulation parameters are set in this
-        constructor
+        The constructor for the base class Room
 
         Parameters
         ----------
         filepath : str
             The filepath that refers to the .obj file of the room geometry
-        FVect : numpy.ndarray[int]
+        FVect : np.ndarray[int], optional
             An array that stores all the frequencies that are used to evaluate
-            the energy histogram
+            the energy histogram, by
+            default np.array([125, 250, 500, 1000, 2000, 4000])
         """
         self.room_file = filepath
 
@@ -72,6 +72,8 @@ class Room:
         self.nFBins = len(self.FVect)
         self.TFHist = np.zeros([int(self.nTBins) + 1, int(self.nFBins)])
         self.ip = None
+        self.src_exists = False
+        self.recv_exists = False
         # self.TFHist = np.zeros([100000, int(self.nFBins)])
 
     def isPointInsideMesh(self, point: np.ndarray[float]):
@@ -87,7 +89,8 @@ class Room:
         Returns
         -------
         bool
-            boolean value
+            point is inside the mesh: True
+            point is not inside the mesh: False
         """
         # Perform the point-in-mesh test using ray casting
         intersections = self.room.ray.intersects_location(
@@ -131,8 +134,7 @@ class Room:
 
         return np.transpose([x, y, z])[0]
 
-    def createReceiver(self, receiver=np.array(
-            [5, 2, 1.3]), radiusOfReceiverSphere=1.0):
+    def createReceiver(self, receiver, radiusOfReceiverSphere=1.0):
         """createReceiver Create the receiver sphere
 
         function that creates the receiver sphere at which the energy of all the
@@ -141,8 +143,7 @@ class Room:
         Parameters
         ----------
         receiver : np.ndarray, optional
-            Coordinates of the center of the receiver sphere, by default
-            np.array( [5, 2, 1.3])
+            Coordinates of the center of the receiver sphere
         radiusOfReceiverSphere : float, optional
             radius of the receiver Sphere, by default 1.0
 
@@ -162,15 +163,32 @@ class Room:
             radius=radiusOfReceiverSphere, center=receiver)
         self.radiusOfReceiver = radiusOfReceiverSphere
         self.receiverCoord = receiver
+        self.recv_exists = True
 
     def createSource(self, source=np.array([2, 2, 2])):
         if self.isPointInsideMesh(source):
             self.sourceCoord = source
-
+            self.src_exists = True
         else:
             raise ValueError('Specified Source is not inside the mesh')
 
     def getBoundaryBoxVolume(self):
+        """getBoundaryBoxVolume returns the volume of the boundary box of the
+        room
+
+        This method returns the volume of the boundary box. Therefore it is not
+        accurate unless the room itself is a box.
+
+        Returns
+        -------
+        float
+            The volume of the room
+
+        Raises
+        ------
+        ValueError
+            If the volume is zero or negative an error gets raised
+        """
         # Assuming you have a trimesh object called 'mesh'
         vertices = self.room.vertices
 
@@ -205,6 +223,11 @@ class Room:
         return width * height * depth
 
     def plotEnergyHistogram(self):
+        """plotEnergyHistogram plots the energy histogram
+
+        This method plots the energy histogram that is
+        constructed by self.performRayTracing
+        """
         # Create the bar plot
 
         x = self.histTimeStep * np.arange(self.TFHist.shape[0])
@@ -224,14 +247,32 @@ class Room:
 
     def performRayTracing_vectorized(self, numberOfRays,
                                      DEBUGMODE=False):
-        """performs main ray tracing algorithm and builds the histogram for the
-            collected ray energies
+        """performRayTracing_vectorized performs main ray tracing algorithm
 
-        Raises:
-            ValueError: If the angle between face normal and reflected ray is
-            greater than 90 degrees
+        This method performs the Ray Tracing algorithm and builds the energy
+        histogram
+
+        Parameters
+        ----------
+        numberOfRays : int
+           Number of Rays that are traced
+        DEBUGMODE : bool, optional
+            Enables some printouts for troubleshooting, by default False
+
+        Raises
+        ------
+        RuntimeError
+            Room contains no source or receiver
+        ValueError
+            Energy histogram has negative values which result in unphysical
+            behaviour
+        ValueError
+            Energy histogram has nan Values
+        ValueError
+            reflection angle is greater than 90 degrees
         """
-
+        if not self.src_exists or not self.recv_exists:
+            raise RuntimeError('Room contains either no source or no receiver')
         np.random.seed(0)
         rays = self.RandSampleSphere(numberOfRays)
 
@@ -506,6 +547,24 @@ class Room:
         scene.show()
 
     def generateRoomImpulseResponse(self):
+        """generateRoomImpulseResponse generates the room Impulse Response of
+        the room
+
+        Uses the energy histogram generated by performRayTracing to generate
+        the RIR by filtering random Poisson Sample sequence with 6 Bandpass
+        filters and weeighing the filtered signals with the energy envelope of
+        the histogram.
+
+        Raises
+        ------
+        RuntimeError
+            Histogram is empty, Ray Tracing has to be performed before calling
+            this method
+        ValueError
+            The time Values are larger than the observed impulse time
+        ValueError
+            NaN values in the impulse response
+        """
 
         if (np.all(self.TFHist == 0)):
             raise RuntimeError("Histogram is empty, run Ray Tracing before \
@@ -657,6 +716,21 @@ class Room:
         plt.show()
 
     def applyRIR(self, audio_file):
+        """applyRIR apply the RIR to any audio file
+
+        Use the RIR to filter a user-specified wav file
+
+        Parameters
+        ----------
+        audio_file : str
+            path to the audio wav file
+
+        Raises
+        ------
+        RuntimeError
+            No RIR found, self.generateRoomImpulseResponse has to be called
+            before this method is executed
+        """
         if self.ip is None:
             raise RuntimeError("No RIR found, generate RIR before applying it \
                                 to an audio file")
