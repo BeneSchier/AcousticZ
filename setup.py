@@ -17,6 +17,7 @@ setup(
         'soundfile',
         'matplotlib',
         'tqdm',
+        'rtree'
         # List any additional dependencies your package requires
     ],
     classifiers=[
