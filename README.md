@@ -1,13 +1,12 @@
 # AcousticZ
 
-AcousticZ is a powerful Python package that allows you to simulate and analyze the real-world acoustic characteristics of rooms. By utilizing stochastic ray tracing, it generates a comprehensive Histogram that captures energy values correlated with frequency and time. This Histogram serves as the foundation for generating highly accurate Room Impulse Responses (RIRs) for any arbitrary 3D room geometry.
+AcousticZ is a powerful Python package that allows you to simulate and analyze the real-world acoustic characteristics of rooms. By utilizing stochastic ray tracing, it generates a comprehensive Histogram that captures energy values correlated with frequency and time. This Histogram serves as the foundation for generating Room Impulse Responses (RIRs) for any arbitrary 3D room geometry.
 
 ## Key Features
 
 - Simulate room impulse responses with ray tracing: AcousticZ employs advanced ray tracing techniques to generate realistic RIRs for virtual rooms.
 - Comprehensive Histogram generation: The package produces a Histogram that stores energy values based on frequency and time, allowing for detailed acoustic analysis.
 - Auralization and reverbant effects: Use the RIRs to apply realistic room effects, such as auralization and reverb, to audio files.
-- Suitable for research and beyond: AcousticZ is not limited to research applications. It has found its way into domains like Virtual Reality Headsets and computer games, enhancing immersive experiences with realistic sound simulations.
 
 ## Installation
 
