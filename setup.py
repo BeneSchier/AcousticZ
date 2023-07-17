@@ -18,7 +18,8 @@ setup(
         'matplotlib',
         'tqdm',
         'rtree',
-        'pyglet'
+        'pyglet<2',
+        'sphinx'
         # List any additional dependencies your package requires
     ],
     classifiers=[
