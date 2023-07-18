@@ -103,6 +103,15 @@ class Room:
         is_inside = len(intersections) % 2 == 1
         return is_inside
 
+    def showRoom(self)->None:
+        """showRoom Visualize the room with the receiver
+
+
+        """
+        scene = \
+            trimesh.Scene([self.room, self.sourceCoord, self.receiverSphere])
+        scene.show()
+
     def RandSampleSphere(self, N):
         """RandSampleSphere Generate a number of random 3D directions that point
         in all directions (spherical shape)
@@ -245,9 +254,9 @@ class Room:
                    "1000 Hz", "2000 Hz", "4000 Hz"])
         plt.show()
 
-    def performRayTracing_vectorized(self, numberOfRays,
-                                     DEBUGMODE=False):
-        """performRayTracing_vectorized performs main ray tracing algorithm
+    def performRayTracing(self, numberOfRays, visualize=False,
+                          DEBUGMODE=False):
+        """performRayTracing performs main ray tracing algorithm
 
         This method performs the Ray Tracing algorithm and builds the energy
         histogram
@@ -256,6 +265,8 @@ class Room:
         ----------
         numberOfRays : int
            Number of Rays that are traced
+        visualize : bool
+           Enable visualization, by default False 
         DEBUGMODE : bool, optional
             Enables some printouts for troubleshooting, by default False
 
@@ -279,12 +290,10 @@ class Room:
         ray_dxyz = rays
         danger = 0
         error_counter = 0
-        scene = trimesh.Scene(
-            [self.room, self.sourceCoord, self.receiverSphere])
-        scene.show()
+        ray_visualize_scene = trimesh.Scene()
         for iBand in tqdm(range(len(self.FVect))):
             # All rays start at the source
-            ray_xyz = np.zeros([len(rays), 3])  # MOVE THIS TO THE TOP
+            ray_xyz = np.zeros([len(rays), 3])
             ray_xyz[:, :] = self.sourceCoord
 
             receiverCoord = np.zeros([len(rays), 3])
@@ -304,7 +313,6 @@ class Room:
 
             ray_dxyz_old = ray_dxyz
 
-            ray_visualize_scene = trimesh.Scene()
             i = 0
             no_target_found = 0
             while (np.any(ray_time <= self.imResTime)
@@ -339,12 +347,14 @@ class Room:
                 if i == 0:
                     paths = np.hstack((ray_xyz_corr, target)).reshape(-1, 2, 3)
 
-                paths = np.vstack(
-                    (paths, np.hstack((ray_xyz_corr,
-                                      target)).reshape(-1, 2, 3)))
+                
+                if visualize:
+                    paths = np.vstack(
+                        (paths, np.hstack((ray_xyz_corr,
+                                          target)).reshape(-1, 2, 3)))
 
-                ray_visualize_scene.add_geometry(trimesh.load_path(
-                    np.hstack((ray_xyz_corr, target)).reshape(-1, 2, 3)))
+                    ray_visualize_scene.add_geometry(trimesh.load_path(
+                        np.hstack((ray_xyz_corr, target)).reshape(-1, 2, 3)))
 
                 if (np.any(np.linalg.norm(target - ray_xyz, axis=1) < 1e-10)):
                     error_counter += 1
@@ -541,10 +551,10 @@ class Room:
             print('final numbers of rays: ', len(ray_xyz))
             print('number of times where no target was found: ',
                   no_target_found)
-
-        scene = trimesh.Scene(
-            [self.room, ray_visualize_scene, self.receiverSphere])
-        scene.show()
+        if visualize:
+            scene = trimesh.Scene(
+                [self.room, ray_visualize_scene, self.receiverSphere])
+            scene.show()
 
     def generateRoomImpulseResponse(self):
         """generateRoomImpulseResponse generates the room Impulse Response of

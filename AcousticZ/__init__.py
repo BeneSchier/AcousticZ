@@ -1,9 +1,9 @@
 """
-pyexample.
+AcousticZ
 
-An example python library.
+Room Impulse Response Simulation using Ray Tracing
 """
 
 __version__ = "0.1.0"
-__author__ = 'Stephen Hudson'
-__credits__ = 'Argonne National Laboratory'
+__author__ = 'Benedikt Schier'
+__credits__ = ''

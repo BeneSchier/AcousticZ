@@ -12,7 +12,9 @@ AcousticZ is a powerful Python package that allows you to simulate and analyze t
 
 To install AcousticZ, ensure that you have Python 3.11 or higher installed. Use pip, the Python package manager, to install AcousticZ from the Python Package Index (PyPI):
 
-´pip install git+https://github.com/BeneSchier/AcousticZ´
+```console
+pip install git+https://github.com/BeneSchier/AcousticZ
+```
 
 
 For detailed installation instructions and alternative installation methods, refer to the [Installation Guide](./docs/build/html/Installation.html) in the documentation.
