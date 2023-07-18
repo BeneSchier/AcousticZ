@@ -12,7 +12,7 @@ setup(
     packages=find_packages(),
     python_requires='>=3.11',
     install_requires=[
-        'numpy==1.24.0',
+        'numpy>=1.24.0',
         'trimesh',
         'scipy',
         'soundfile',
