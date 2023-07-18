@@ -35,7 +35,9 @@ shoebox = Room(shoebox_file)
 Alternatively you can use the provided example mesh for a shoebox:
 ```python
 import pkg_resources
+import os
 shoebox_file =  pkg_resources.resource_filename('AcousticZ', '../data/example_meshes/shoebox.obj')
+shoebox_file = os.abspath(shoebox_file)
 shoebox = Room(shoebox_file)
 ```
 
