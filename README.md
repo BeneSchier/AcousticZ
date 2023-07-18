@@ -15,12 +15,12 @@ To install AcousticZ, ensure that you have Python 3.11 or higher installed. Use 
 ´pip install git+https://github.com/BeneSchier/AcousticZ´
 
 
-For detailed installation instructions and alternative installation methods, refer to the [Installation Guide](installation.html) in the documentation.
+For detailed installation instructions and alternative installation methods, refer to the [Installation Guide](./docs/build/html/Installation.html) in the documentation.
 
 ## Getting Started
 
-Once you have installed AcousticZ, check out the [Getting Started](getting_started.html) guide to begin using the package. It provides an overview of the basic usage, explains the required prerequisites, and offers example code to simulate room impulse responses and perform auralization.
+Once you have installed AcousticZ, check out the [Getting Started](./docs/build/html/GettingStarted.html) guide to begin using the package. It provides an overview of the basic usage, explains the required prerequisites, and offers example code to simulate room impulse responses and perform auralization.
 
 ## Documentation
 
-For comprehensive information on the AcousticZ package, including the API reference, advanced features, and tutorials, refer to the full [Documentation](documentation.html). It covers various topics such as room geometry, sound source positioning, and more.
+For comprehensive information on the AcousticZ package, including the API reference, advanced features, and tutorials, refer to the full [Documentation](./docs/build/html/index.html). It covers various topics such as room geometry, sound source positioning, and more.

@@ -21,6 +21,7 @@ setup(
         'rtree',
         'pyglet<2',
         'sphinx',
+        'pytest',
         # List any additional dependencies your package requires
     ],
     classifiers=[
