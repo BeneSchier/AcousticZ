@@ -13,7 +13,7 @@ setup(
     package_data={
         'AcousticZ': [
             'data/example_audio/*',
-            'data/example_mesh',
+            'data/example_mesh/*',
         ]
     },
     python_requires='>=3.11',
