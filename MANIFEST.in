@@ -1,5 +1,7 @@
 include README.md
 
+
+recursive-include docs *
 recursive-include tests *
 recursive-exclude * __pycache__
 recursive-exclude docs *
