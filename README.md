@@ -35,12 +35,13 @@ shoebox = Room(shoebox_file)
 Alternatively you can use the provided example mesh for a shoebox:
 ```python
 import pkg_resources
-shoebox_file =  pkg_resources.resource_filename('AcousticZ', 'data/example_meshes/shoebox.obj')
+shoebox_file =  pkg_resources.resource_filename('AcousticZ', '../data/example_meshes/shoebox.obj')
 shoebox = Room(shoebox_file)
 ```
 
 Then add a source and a receiver by:
 ```python
+import numpy as np
 # Just example values, ensure that the coordinates are located inside the room
 source = np.array([2.0, 2.0, 2.0]) 
 receiver = np.array([5.0, 5.0, 1.8])
@@ -54,14 +55,14 @@ shoebox.createReceiver(receiver, radiusOfReceiverSphere=0.0875)
 
 Perform the Ray Tracing algorithm with 100 rays:
 ```python
-# Perform Ray Tracing with 5000 rays
-shoebox.performRayTracing(5000)
+# Perform Ray Tracing with 100 rays
+shoebox.performRayTracing(100)
 ```
 
 And genrate and display the RIR by:
 ```python
 # Generate the Room Impulse Response
-shoebox.generateRoomImpulseResponse()
+shoebox.generateRIR()
 shoebox.plotWaveform()
 ```
 
