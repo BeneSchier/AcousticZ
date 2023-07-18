@@ -16,6 +16,12 @@ To install AcousticZ, ensure that you have Python 3.11 or higher installed. Use 
 pip install git+https://github.com/BeneSchier/AcousticZ
 ```
 
+However, it is strongly recommended to clone the repository and install the package by executing the following command in the top directory of the Repository:
+
+```console
+pip install .
+```
+The reason is that the repository provied additional tests, examples, docs to help understanding the package.
 
 For detailed installation instructions and alternative installation methods, refer to the [Installation Guide](./docs/build/html/Installation.html) in the documentation.
 
