@@ -12,8 +12,8 @@ setup(
     packages=find_packages(),
     package_data={
         'AcousticZ': [
-            'data/example_audio/*',
-            'data/example_mesh/*',
+            '/data/example_audio/*',
+            '/data/example_mesh/shoebox.obj',
         ]
     },
     python_requires='>=3.11',
