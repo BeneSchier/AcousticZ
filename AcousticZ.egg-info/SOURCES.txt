@@ -12,6 +12,10 @@ AcousticZ.egg-info/requires.txt
 AcousticZ.egg-info/top_level.txt
 AcousticZ/Helper/__init__.py
 AcousticZ/Helper/angle_between_vectors.py
+data/example_audio/drums.wav
+data/example_audio/snare.wav
+data/example_meshes/InteriorTest.obj
+data/example_meshes/shoebox.obj
 tests/test_Helper.py
 tests/test_completeWorkflow.py
 tests/test_room.py
