@@ -45,14 +45,7 @@ If you want to simulate the RIR of a simple shoebox you can do this by first rea
 shoebox_file = '<your_meshfile.obj>'
 shoebox = Room(shoebox_file)
 ```
-Alternatively you can use the provided example mesh for a shoebox:
-```python
-import pkg_resources
-import os
-shoebox_file =  pkg_resources.resource_filename('AcousticZ', '../data/example_meshes/shoebox.obj')
-shoebox_file = os.path.abspath(shoebox_file)
-shoebox = Room(shoebox_file)
-```
+You cam download some example meshes from the git repo. There are two example meshes in the data folder.
 
 Then add a source and a receiver by:
 ```python

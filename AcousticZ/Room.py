@@ -37,8 +37,7 @@ class Room:
 
         self.room = trimesh.load(self.room_file, force='mesh')
         if not self.room.is_watertight:
-            warnings.warn('room is not watertight: possibility of "escaping" \
-                rays')
+            warnings.warn('room is not watertight: possibility of escaping rays')
         self.min_bound, self.max_bound = self.room.bounds
         self.roomDimensions = self.max_bound - self.min_bound
 
@@ -389,7 +388,6 @@ class Room:
                     indexOfFace = indexOfFace[flawless_index]
                     target = target[flawless_index]
                     receiverCoord = receiverCoord[flawless_index]
-                    
 
                 displacement = target - ray_xyz
 
@@ -408,13 +406,15 @@ class Room:
 
                 # apply surface reflection -> amount of energy that is not lost
                 # through absorption
-                ray_energy = ray_energy * (R[0, iBand])
+                ray_energy = ray_energy \
+                    * (self.reflectionCoefficients[0, iBand])
 
                 # diffuse reflection -> fraction of energy that is used to
                 # determine what detected at receiver
 
                 # amount of energy that gets directly to the receiver
-                rayrecv_energy = ray_energy * (D[0, iBand])
+                rayrecv_energy = ray_energy \
+                    * (self.scatteringCoefficients[0, iBand])
 
                 rayrecvvector = receiverCoord - impactCoord
 
@@ -508,7 +508,8 @@ class Room:
                 ray_dxyz_old = ray_dxyz
 
                 # combine specular and random component
-                ray_dxyz = D[0, iBand] * d + (1 - D[0, iBand]) * ref
+                ray_dxyz = self.scatteringCoefficients[0, iBand] * d
+                + (1 - self.scatteringCoefficients[0, iBand]) * ref
 
                 ray_dxyz = ray_dxyz \
                     / np.linalg.norm(ray_dxyz, axis=1)[:, np.newaxis]
@@ -724,7 +725,7 @@ class Room:
 
         # Combine the filtered sequences
         self.impTimes = (1 / fs) * np.arange(y.shape[0])
-        W = np.zeros((y.shape[0], len(FVect)))
+        W = np.zeros((y.shape[0], len(self.FVect)))
         BW = fhigh - flow
 
         for k in range(self.TFHist.shape[0]):
@@ -786,33 +787,15 @@ class Room:
         sf.write(output_path, audioOut, fs)
 
 
-# room_file = 'C:/Users/Benes/Documents/Git/roomAcoustics/roomAcoustics/roomAcoustics/InteriorTest.obj'
-#room_file = 'C:/Users/Benes/Documents/Git/roomAcoustics/roomAcoustics/Vaiko_2.obj'
 
 
-room_file = 'C:/Users/Benes/Documents/Git/roomAcoustics/AcousticZ/data/example_meshes/shoebox.obj'
-
-
-FVect = np.array([125, 250, 500, 1000, 2000, 4000])
-# Absorption coefficients
-A = np.array([[0.08, 0.09, 0.12, 0.16, 0.22, 0.24],
-              [0.08, 0.09, 0.12, 0.16, 0.22, 0.24],
-              [0.08, 0.09, 0.12, 0.16, 0.22, 0.24],
-              [0.08, 0.09, 0.12, 0.16, 0.22, 0.24],
-              [0.08, 0.09, 0.12, 0.16, 0.22, 0.24],
-              [0.08, 0.09, 0.12, 0.16, 0.22, 0.24]]).T
-# Reflection coefficients
-R = np.sqrt(1 - A)
-
-# frequency-dependant scattering coefficients
-D = np.array([[0.05, 0.3, 0.7, 0.9, 0.92, 0.94],
-              [0.05, 0.3, 0.7, 0.9, 0.92, 0.94],
-              [0.05, 0.3, 0.7, 0.9, 0.92, 0.94],
-              [0.05, 0.3, 0.7, 0.9, 0.92, 0.94],
-              [0.01, 0.05, 0.1, 0.2, 0.3, 0.5],
-              [0.01, 0.05, 0.1, 0.2, 0.3, 0.5]])
 
 if __name__ == '__main__':
+    # room_file = 'C:/Users/Benes/Documents/Git/roomAcoustics/roomAcoustics/roomAcoustics/InteriorTest.obj'
+    #room_file = 'C:/Users/Benes/Documents/Git/roomAcoustics/roomAcoustics/Vaiko_2.obj'
+
+
+    room_file = 'C:/Users/Benes/Documents/Git/roomAcoustics/AcousticZ/data/example_meshes/shoebox.obj'
     r = Room(room_file)
     print('created room')
 

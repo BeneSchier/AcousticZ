@@ -23,13 +23,12 @@ shoebox.showRoom()
 
 # Perform Ray Tracing with 5000 rays
 shoebox.performRayTracing(10, visualize=True)
-
+shoebox.plotEnergyHistogram()
 # Generate the Room Impulse Response
-shoebox.generateRoomImpulseResponse()
+shoebox.generateRIR()
 shoebox.plotWaveform()
 
 # Define path to audio file
-audio_file = '../data/example_audio/drums.wav'
-# Define output path
-output_path = './out'
-shoebox.applyRIR(audio_file)
+audio_file = current_dir + '/../data/example_audio/drums.wav'
+output_path = current_dir + './out/processed_shoebox.wav'
+shoebox.applyRIR(audio_file, output_path)
