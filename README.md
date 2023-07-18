@@ -21,7 +21,7 @@ However, it is strongly recommended to clone the repository and install the pack
 ```console
 pip install .
 ```
-The reason is that the repository provied additional tests, examples, docs to help understanding the package.
+The reason is that the repository provides additional tests, examples and docs to help understanding the package.
 
 For detailed installation instructions and alternative installation methods, refer to the [Installation Guide](./docs/build/html/Installation.html) in the documentation.
 
