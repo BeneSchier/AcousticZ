@@ -12,14 +12,6 @@ AcousticZ.Helper.angle\_between\_vectors module
    :undoc-members:
    :show-inheritance:
 
-AcousticZ.Helper.calculate\_opening\_angle module
--------------------------------------------------
-
-.. automodule:: AcousticZ.Helper.calculate_opening_angle
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Module contents
 ---------------
 

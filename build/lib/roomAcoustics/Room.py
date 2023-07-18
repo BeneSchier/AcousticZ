@@ -605,7 +605,7 @@ class Room:
 
     def applyRIR(self):
         fs, audioIn = scipy.io.wavfile.read(
-            "C:/Users/Benes/Documents/Git/roomAcoustics/roomAcoustics/roomAcoustics/funnyantonia.wav")
+            "C:/Users/Benes/Documents/Git/roomAcoustics/roomAcoustics/roomAcoustics/drumsa.wav")
         # audioIn = audioIn[:, 0]
 
         # audioOut = scipy.signal.lfilter(self.ip, 1, audioIn)

@@ -31,7 +31,7 @@ Step 1: Open a command-line interface (CLI) or terminal.
 
 Step 2: Execute the following command to install AcousticZ and its dependencies::
 
-    pip install acousticz
+    pip install git+https://github.com/BeneSchier/AcousticZ
 
 Option 2: Installing from Source
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -54,7 +54,7 @@ Verifying the Installation
 
 To ensure a successful installation, you can perform a quick verification. Open a Python interactive shell or a Python script and import the AcousticZ module::
 
-    import acousticz
+    import AcousticZ
 
 If the import statement executes without errors, congratulations! AcousticZ is successfully installed on your system.
 

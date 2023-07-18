@@ -1,50 +1,114 @@
 <!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <title>API Reference &#8212; AcousticZ 0.01 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Reference &mdash; AcousticZ 0.01 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="AcousticZ.Helper package" href="AcousticZ.Helper.html" />
-    <link rel="prev" title="Getting Started" href="GettingStarted.html" />
-   
-  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
-  
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+    <link rel="prev" title="Getting Started" href="GettingStarted.html" /> 
+</head>
 
-  </head><body>
-  
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
           
+          
+          <a href="index.html" class="icon icon-home">
+            AcousticZ
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="AcousticZ.Helper.html">AcousticZ.Helper package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-AcousticZ.Room">AcousticZ.Room module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#AcousticZ.Room.Room"><code class="docutils literal notranslate"><span class="pre">Room</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#AcousticZ.Room.Room.RandSampleSphere"><code class="docutils literal notranslate"><span class="pre">Room.RandSampleSphere()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#AcousticZ.Room.Room.applyRIR"><code class="docutils literal notranslate"><span class="pre">Room.applyRIR()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#AcousticZ.Room.Room.createReceiver"><code class="docutils literal notranslate"><span class="pre">Room.createReceiver()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#AcousticZ.Room.Room.createSource"><code class="docutils literal notranslate"><span class="pre">Room.createSource()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#AcousticZ.Room.Room.generateRIR"><code class="docutils literal notranslate"><span class="pre">Room.generateRIR()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#AcousticZ.Room.Room.getBoundaryBoxVolume"><code class="docutils literal notranslate"><span class="pre">Room.getBoundaryBoxVolume()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#AcousticZ.Room.Room.isPointInsideMesh"><code class="docutils literal notranslate"><span class="pre">Room.isPointInsideMesh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#AcousticZ.Room.Room.performRayTracing"><code class="docutils literal notranslate"><span class="pre">Room.performRayTracing()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#AcousticZ.Room.Room.plotEnergyHistogram"><code class="docutils literal notranslate"><span class="pre">Room.plotEnergyHistogram()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#AcousticZ.Room.Room.plotWaveform"><code class="docutils literal notranslate"><span class="pre">Room.plotWaveform()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#AcousticZ.Room.Room.showRoom"><code class="docutils literal notranslate"><span class="pre">Room.showRoom()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-AcousticZ">Module contents</a></li>
+</ul>
+</li>
+</ul>
 
-          <div class="body" role="main">
-            
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">AcousticZ</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">API Reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/APIReference.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
   <section id="api-reference">
-<h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this heading">¶</a></h1>
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this heading"></a></h1>
 <section id="subpackages">
-<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading">¶</a></h2>
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="AcousticZ.Helper.html">AcousticZ.Helper package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="AcousticZ.Helper.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="AcousticZ.Helper.html#module-AcousticZ.Helper.angle_between_vectors">AcousticZ.Helper.angle_between_vectors module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="AcousticZ.Helper.html#AcousticZ.Helper.angle_between_vectors.angle_between_vectors"><code class="docutils literal notranslate"><span class="pre">angle_between_vectors()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="AcousticZ.Helper.html#module-AcousticZ.Helper.calculate_opening_angle">AcousticZ.Helper.calculate_opening_angle module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="AcousticZ.Helper.html#AcousticZ.Helper.calculate_opening_angle.calculate_opening_angle"><code class="docutils literal notranslate"><span class="pre">calculate_opening_angle()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="AcousticZ.Helper.html#module-AcousticZ.Helper">Module contents</a></li>
@@ -54,34 +118,34 @@
 </div>
 </section>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">¶</a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
 </section>
 <section id="module-AcousticZ.Room">
-<span id="acousticz-room-module"></span><h2>AcousticZ.Room module<a class="headerlink" href="#module-AcousticZ.Room" title="Permalink to this heading">¶</a></h2>
+<span id="acousticz-room-module"></span><h2>AcousticZ.Room module<a class="headerlink" href="#module-AcousticZ.Room" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="AcousticZ.Room.Room">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">AcousticZ.Room.</span></span><span class="sig-name descname"><span class="pre">Room</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numberOfRays</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FVect</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">absorptionCoefficients</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scatteringCoefficients</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AcousticZ.Room.Room" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">AcousticZ.Room.</span></span><span class="sig-name descname"><span class="pre">Room</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FVect</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">array([125,</span> <span class="pre">250,</span> <span class="pre">500,</span> <span class="pre">1000,</span> <span class="pre">2000,</span> <span class="pre">4000])</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AcousticZ.Room.Room" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>This is the main class for the RIR simulation</p>
 <p>All simulation parameters, physical characteristics and functionalities,
-that are needed to generate a RIR for a given room is stored inside this 
+that are needed to generate a RIR for a given room is stored inside this
 class.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="AcousticZ.Room.Room.RandSampleSphere">
-<span class="sig-name descname"><span class="pre">RandSampleSphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AcousticZ.Room.Room.RandSampleSphere" title="Permalink to this definition">¶</a></dt>
-<dd><p>RandSampleSphere Generate a number of random 3D directions that point 
+<span class="sig-name descname"><span class="pre">RandSampleSphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#AcousticZ.Room.Room.RandSampleSphere" title="Permalink to this definition"></a></dt>
+<dd><p>RandSampleSphere Generate a number of random 3D directions that point
 in all directions (spherical shape)</p>
-<p>This function is needed to initialize the rays first direction. It does 
+<p>This function is needed to initialize the rays first direction. It does
 does that by generating a specified number of random directions.</p>
 <section id="parameters">
-<h3>Parameters<a class="headerlink" href="#parameters" title="Permalink to this heading">¶</a></h3>
+<h3>Parameters<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h3>
 <dl class="simple">
 <dt>N<span class="classifier">int</span></dt><dd><p>number of Rays/Directions</p>
 </dd>
 </dl>
 </section>
 <section id="returns">
-<h3>Returns<a class="headerlink" href="#returns" title="Permalink to this heading">¶</a></h3>
+<h3>Returns<a class="headerlink" href="#returns" title="Permalink to this heading"></a></h3>
 <dl class="simple">
 <dt>np.ndarray[float]</dt><dd><p>Nx3 array with all the directions</p>
 </dd>
@@ -91,27 +155,46 @@ does that by generating a specified number of random directions.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="AcousticZ.Room.Room.applyRIR">
-<span class="sig-name descname"><span class="pre">applyRIR</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#AcousticZ.Room.Room.applyRIR" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">applyRIR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">audio_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./processed_audio.wav'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#AcousticZ.Room.Room.applyRIR" title="Permalink to this definition"></a></dt>
+<dd><p>applyRIR apply the RIR to any audio file</p>
+<p>Use the RIR to filter a user-specified wav file</p>
+<section id="id1">
+<h3>Parameters<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>audio_file<span class="classifier">str</span></dt><dd><p>path to the audio wav file</p>
+</dd>
+<dt>output:path<span class="classifier">str</span></dt><dd><p>output path where the processed audio file should be written, by
+default ‘./’</p>
+</dd>
+</dl>
+</section>
+<section id="raises">
+<h3>Raises<a class="headerlink" href="#raises" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>RuntimeError</dt><dd><p>No RIR found, self.generateRoomImpulseResponse has to be called
+before this method is executed</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="AcousticZ.Room.Room.createReceiver">
-<span class="sig-name descname"><span class="pre">createReceiver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">receiver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([5.,</span> <span class="pre">2.,</span> <span class="pre">1.3])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radiusOfReceiverSphere</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AcousticZ.Room.Room.createReceiver" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">createReceiver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">receiver</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radiusOfReceiverSphere</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#AcousticZ.Room.Room.createReceiver" title="Permalink to this definition"></a></dt>
 <dd><p>createReceiver Create the receiver sphere</p>
 <p>function that creates the receiver sphere at which the energy of all the
 rays gets evaluated.</p>
-<section id="id1">
-<h3>Parameters<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<section id="id2">
+<h3>Parameters<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
 <dl class="simple">
-<dt>receiver<span class="classifier">np.ndarray, optional</span></dt><dd><p>Coordinates of the center of the receiver sphere, by default 
-np.array( [5, 2, 1.3])</p>
+<dt>receiver<span class="classifier">np.ndarray, optional</span></dt><dd><p>Coordinates of the center of the receiver sphere</p>
 </dd>
 <dt>radiusOfReceiverSphere<span class="classifier">float, optional</span></dt><dd><p>radius of the receiver Sphere, by default 1.0</p>
 </dd>
 </dl>
 </section>
-<section id="raises">
-<h3>Raises<a class="headerlink" href="#raises" title="Permalink to this heading">¶</a></h3>
+<section id="id3">
+<h3>Raises<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
 <dl class="simple">
 <dt>ValueError</dt><dd><p>If a center point is specified that is not inside the mesh</p>
 </dd>
@@ -121,148 +204,168 @@ np.array( [5, 2, 1.3])</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="AcousticZ.Room.Room.createSource">
-<span class="sig-name descname"><span class="pre">createSource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([2,</span> <span class="pre">2,</span> <span class="pre">2])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AcousticZ.Room.Room.createSource" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">createSource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#AcousticZ.Room.Room.createSource" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="AcousticZ.Room.Room.generateRIR">
-<span class="sig-name descname"><span class="pre">generateRIR</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#AcousticZ.Room.Room.generateRIR" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">generateRIR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filterOutput</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#AcousticZ.Room.Room.generateRIR" title="Permalink to this definition"></a></dt>
+<dd><p>generateRoomImpulseResponse generates the room Impulse Response of
+the room</p>
+<p>Uses the energy histogram generated by performRayTracing to generate
+the RIR by filtering random Poisson Sample sequence with 6 Bandpass
+filters and weeighing the filtered signals with the energy envelope of
+the histogram.</p>
+<section id="id4">
+<h3>Raises<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>RuntimeError</dt><dd><p>Histogram is empty, Ray Tracing has to be performed before calling
+this method</p>
+</dd>
+<dt>ValueError</dt><dd><p>The time Values are larger than the observed impulse time</p>
+</dd>
+<dt>ValueError</dt><dd><p>NaN values in the impulse response</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="AcousticZ.Room.Room.generateRoomImpulseResponse">
-<span class="sig-name descname"><span class="pre">generateRoomImpulseResponse</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#AcousticZ.Room.Room.generateRoomImpulseResponse" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="AcousticZ.Room.Room.getRoomVolume">
-<span class="sig-name descname"><span class="pre">getRoomVolume</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#AcousticZ.Room.Room.getRoomVolume" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="AcousticZ.Room.Room.getBoundaryBoxVolume">
+<span class="sig-name descname"><span class="pre">getBoundaryBoxVolume</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#AcousticZ.Room.Room.getBoundaryBoxVolume" title="Permalink to this definition"></a></dt>
+<dd><p>getBoundaryBoxVolume returns the volume of the boundary box of the
+room</p>
+<p>This method returns the volume of the boundary box. Therefore it is not
+accurate unless the room itself is a box.</p>
+<section id="id5">
+<h3>Returns<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>float</dt><dd><p>The volume of the room</p>
+</dd>
+</dl>
+</section>
+<section id="id6">
+<h3>Raises<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>ValueError</dt><dd><p>If the volume is zero or negative an error gets raised</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="AcousticZ.Room.Room.isPointInsideMesh">
-<span class="sig-name descname"><span class="pre">isPointInsideMesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AcousticZ.Room.Room.isPointInsideMesh" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">isPointInsideMesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#AcousticZ.Room.Room.isPointInsideMesh" title="Permalink to this definition"></a></dt>
 <dd><p>isPointInsideMesh check if a 3D point is inside the room</p>
 <p>This function checks if a point is inside the room geometry</p>
-<section id="id2">
-<h3>Parameters<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<section id="id7">
+<h3>Parameters<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h3>
 <dl class="simple">
 <dt>point<span class="classifier">np.ndarray[float]</span></dt><dd><p>The point that gets checked</p>
 </dd>
 </dl>
 </section>
-<section id="id3">
-<h3>Returns<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<section id="id8">
+<h3>Returns<a class="headerlink" href="#id8" title="Permalink to this heading"></a></h3>
 <dl class="simple">
-<dt>bool</dt><dd><p>boolean value</p>
+<dt>bool</dt><dd><p>point is inside the mesh: True
+point is not inside the mesh: False</p>
 </dd>
 </dl>
 </section>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="AcousticZ.Room.Room.performRayTracing_vectorized">
-<span class="sig-name descname"><span class="pre">performRayTracing_vectorized</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#AcousticZ.Room.Room.performRayTracing_vectorized" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>performs main ray tracing algorithm and builds the histogram for the</dt><dd><p>collected ray energies</p>
+<dt class="sig sig-object py" id="AcousticZ.Room.Room.performRayTracing">
+<span class="sig-name descname"><span class="pre">performRayTracing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numberOfRays</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visualize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DEBUGMODE</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#AcousticZ.Room.Room.performRayTracing" title="Permalink to this definition"></a></dt>
+<dd><p>performRayTracing performs main ray tracing algorithm</p>
+<p>This method performs the Ray Tracing algorithm and builds the energy
+histogram</p>
+<section id="id9">
+<h3>Parameters<a class="headerlink" href="#id9" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>numberOfRays<span class="classifier">int</span></dt><dd><p>Number of Rays that are traced</p>
 </dd>
-<dt>Raises:</dt><dd><p>ValueError: If the angle between face normal and reflected ray is 
-greater than 90 degrees</p>
+<dt>visualize<span class="classifier">bool</span></dt><dd><p>Enable visualization, by default False</p>
+</dd>
+<dt>DEBUGMODE<span class="classifier">bool, optional</span></dt><dd><p>Enables some printouts for troubleshooting, by default False</p>
 </dd>
 </dl>
+</section>
+<section id="id10">
+<h3>Raises<a class="headerlink" href="#id10" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>RuntimeError</dt><dd><p>Room contains no source or receiver</p>
+</dd>
+<dt>ValueError</dt><dd><p>Energy histogram has negative values which result in unphysical
+behaviour</p>
+</dd>
+<dt>ValueError</dt><dd><p>Energy histogram has nan Values</p>
+</dd>
+<dt>ValueError</dt><dd><p>reflection angle is greater than 90 degrees</p>
+</dd>
+</dl>
+</section>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="AcousticZ.Room.Room.plotEnergyHistogram">
-<span class="sig-name descname"><span class="pre">plotEnergyHistogram</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#AcousticZ.Room.Room.plotEnergyHistogram" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">plotEnergyHistogram</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#AcousticZ.Room.Room.plotEnergyHistogram" title="Permalink to this definition"></a></dt>
+<dd><p>plotEnergyHistogram plots the energy histogram</p>
+<p>This method plots the energy histogram that is
+constructed by self.performRayTracing</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AcousticZ.Room.Room.plotWaveform">
+<span class="sig-name descname"><span class="pre">plotWaveform</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#AcousticZ.Room.Room.plotWaveform" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="AcousticZ.Room.Room.showRoom">
+<span class="sig-name descname"><span class="pre">showRoom</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#AcousticZ.Room.Room.showRoom" title="Permalink to this definition"></a></dt>
+<dd><p>showRoom Visualize the room with the receiver</p>
+</dd></dl>
 
 </dd></dl>
 
 </section>
 <section id="module-AcousticZ">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-AcousticZ" title="Permalink to this heading">¶</a></h2>
-<p>pyexample.</p>
-<p>An example python library.</p>
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-AcousticZ" title="Permalink to this heading"></a></h2>
+<p>AcousticZ</p>
+<p>Room Impulse Response Simulation using Ray Tracing</p>
 </section>
 </section>
 
 
+           </div>
           </div>
-          
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="GettingStarted.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="AcousticZ.Helper.html" class="btn btn-neutral float-right" title="AcousticZ.Helper package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Benedikt Schier.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="index.html">AcousticZ</a></h1>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
 
-
-
-
-
-
-
-
-<h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Getting Started</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-AcousticZ.Room">AcousticZ.Room module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-AcousticZ">Module contents</a></li>
-</ul>
-</li>
-</ul>
-
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="GettingStarted.html" title="previous chapter">Getting Started</a></li>
-      <li>Next: <a href="AcousticZ.Helper.html" title="next chapter">AcousticZ.Helper package</a></li>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
-
-
-
-
-
-
-
-
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2023, Benedikt Schier.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.0.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
-      
-      |
-      <a href="_sources/APIReference.rst.txt"
-          rel="nofollow">Page source</a>
-    </div>
-
-    
-
-    
-  </body>
+</body>
 </html>

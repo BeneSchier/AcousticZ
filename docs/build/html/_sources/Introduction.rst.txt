@@ -12,6 +12,9 @@ Introduction
 | Introducing AcousticZ, a Python package that harnesses the power 
   of ray tracing to simulate the intricate acoustic properties of real-world 
   environments. 
+
+.. image:: ./images/Ray_Tracing_1.jpg
+
 | 
 | With its stochastic ray tracing technique, AcousticZ generates a 
   comprehensive Histogram that captures and stores energy values, correlated 
@@ -20,6 +23,8 @@ Introduction
   room geometry. The resulting RIR is a representation of the room's 
   acoustic behavior, encompassing the intricate interplay of auralization and 
   reverberant effects.
+
+.. image:: ./images/waveform_5000_filtered.png
 
 | Beyond its value in research, RIR simulation has found its way into 
   groundbreaking domains. The rise of Virtual Reality Headsets has paved the 

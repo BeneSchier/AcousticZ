@@ -4,14 +4,10 @@ import scipy
 import matplotlib.pyplot as plt
 import trimesh
 import soundfile as sf
-# import sounddevice as sd
 import warnings
 
 from tqdm import tqdm
 from AcousticZ.Helper.angle_between_vectors import angle_between_vectors
-
-# from scipy.stats import poisson
-# from scipy.fft import ifft
 
 
 class Room:
@@ -23,7 +19,7 @@ class Room:
     """
     def __init__(self, filepath: str,
                  FVect: np.ndarray[int] =
-                 np.array([125, 250, 500, 1000, 2000, 4000])):
+                 np.array([125, 250, 500, 1000, 2000, 4000])) -> None:
         """__init__ The constructor for the Room class
 
         The constructor for the base class Room
@@ -79,7 +75,7 @@ class Room:
         self.impTimes = None
         # self.TFHist = np.zeros([100000, int(self.nFBins)])
 
-    def isPointInsideMesh(self, point: np.ndarray[float]):
+    def isPointInsideMesh(self, point: np.ndarray[float]) -> bool:
         """isPointInsideMesh check if a 3D point is inside the room
 
         This function checks if a point is inside the room geometry
@@ -113,12 +109,12 @@ class Room:
         """
         if self.src_exists and self.recv_exists:
             scene = \
-                trimesh.Scene([self.room, self.sourceCoord, 
+                trimesh.Scene([self.room, self.sourceCoord,
                                self.receiverSphere])
         else:
             scene = trimesh.Scene(self.room)
         scene.show()
-        
+
     def plotWaveform(self) -> None:
         # Plotting
         if self.waveform is None or self.impTimes is None:
@@ -133,7 +129,7 @@ class Room:
         plt.ylim(-1, 1)
         plt.show()
 
-    def RandSampleSphere(self, N):
+    def RandSampleSphere(self, N: int) -> np.ndarray[float]:
         """RandSampleSphere Generate a number of random 3D directions that point
         in all directions (spherical shape)
 
@@ -164,7 +160,8 @@ class Room:
 
         return np.transpose([x, y, z])[0]
 
-    def createReceiver(self, receiver, radiusOfReceiverSphere=1.0):
+    def createReceiver(self, receiver: np.ndarray[float],
+                       radiusOfReceiverSphere=1.0) -> None:
         """createReceiver Create the receiver sphere
 
         function that creates the receiver sphere at which the energy of all the
@@ -195,14 +192,14 @@ class Room:
         self.receiverCoord = receiver
         self.recv_exists = True
 
-    def createSource(self, source=np.array([2, 2, 2])):
+    def createSource(self, source: np.ndarray[float]) -> None:
         if self.isPointInsideMesh(source):
             self.sourceCoord = source
             self.src_exists = True
         else:
             raise ValueError('Specified Source is not inside the mesh')
 
-    def getBoundaryBoxVolume(self):
+    def getBoundaryBoxVolume(self) -> None:
         """getBoundaryBoxVolume returns the volume of the boundary box of the
         room
 
@@ -252,7 +249,7 @@ class Room:
 
         return width * height * depth
 
-    def plotEnergyHistogram(self):
+    def plotEnergyHistogram(self) -> None:
         """plotEnergyHistogram plots the energy histogram
 
         This method plots the energy histogram that is
@@ -275,8 +272,8 @@ class Room:
                    "1000 Hz", "2000 Hz", "4000 Hz"])
         plt.show()
 
-    def performRayTracing(self, numberOfRays, visualize=False,
-                          DEBUGMODE=False):
+    def performRayTracing(self, numberOfRays: int, visualize=False,
+                          DEBUGMODE=False) -> None:
         """performRayTracing performs main ray tracing algorithm
 
         This method performs the Ray Tracing algorithm and builds the energy
@@ -287,7 +284,7 @@ class Room:
         numberOfRays : int
            Number of Rays that are traced
         visualize : bool
-           Enable visualization, by default False 
+           Enable visualization, by default False
         DEBUGMODE : bool, optional
             Enables some printouts for troubleshooting, by default False
 
@@ -372,9 +369,13 @@ class Room:
                     paths = np.vstack(
                         (paths, np.hstack((ray_xyz_corr,
                                           target)).reshape(-1, 2, 3)))
-
-                    ray_visualize_scene.add_geometry(trimesh.load_path(
-                        np.hstack((ray_xyz_corr, target)).reshape(-1, 2, 3)))
+                    
+                    path = trimesh.load_path(
+                        np.hstack((ray_xyz_corr, target)).reshape(-1, 2, 3))
+                    colors = np.zeros([len(path.entities), 4])
+                    colors[:, :] = [0.0, 0.0, 1.0, 0.5]
+                    path.colors = colors
+                    ray_visualize_scene.add_geometry(path)
 
                 if (np.any(np.linalg.norm(target - ray_xyz, axis=1) < 1e-10)):
                     error_counter += 1
@@ -432,6 +433,7 @@ class Room:
                     indexOfFace = indexOfFace[non_skippable]
                     target = target[non_skippable]
                     rayrecvvector = rayrecvvector[non_skippable]
+                    receiverCoord = receiverCoord[non_skippable]
                     recv_timeofarrival = recv_timeofarrival[non_skippable]
                     rayrecv_energy = rayrecv_energy[non_skippable]
                     # break
@@ -458,10 +460,27 @@ class Room:
 
                 cosTheta = np.sum(np.abs(rayrecvvector * N), axis=1) / \
                     (np.sqrt(np.sum(rayrecvvector ** 2, axis=1)))
-                cosAlpha = np.sqrt(np.sum(rayrecvvector ** 2, axis=1)
-                                   - r ** 2) / np.sum(np.power(rayrecvvector,
-                                                               2), axis=1)
+
+                if (np.any(cosTheta >= 1)):
+                    invalid_index = np.where(cosTheta >= 1)[0]
+                    N[invalid_index] *= -1.0
+
+                cosTheta = np.sum(np.abs(rayrecvvector * N), axis=1) / \
+                    (np.sqrt(np.sum(rayrecvvector ** 2, axis=1)))
+
+                if (np.any(cosTheta >= 1)):
+                    raise ValueError('receiver vector is unphysical')
+
+                # cosAlpha = np.sqrt(np.sum(rayrecvvector ** 2, axis=1)
+                #                    - r ** 2) / np.sum(np.power(rayrecvvector,
+                #                                                2), axis=1)
+                projectionVector = receiverCoord + [r, 0.0, 0.0]
+                cosAlpha = np.sum(rayrecvvector * projectionVector, axis=1) \
+                    / (np.linalg.norm(rayrecvvector, axis=1)
+                        * np.linalg.norm(projectionVector, axis=1))
+
                 E = (1 - cosAlpha) * 2 * cosTheta * rayrecv_energy
+
                 if (np.any(E < 0)):
                     raise ValueError('Histogram energy < 0')
                 if (np.any(np.isnan(E))):
@@ -576,7 +595,7 @@ class Room:
                 [self.room, ray_visualize_scene, self.receiverSphere])
             scene.show()
 
-    def generateRIR(self):
+    def generateRIR(self, filterOutput=True) -> None:
         """generateRoomImpulseResponse generates the room Impulse Response of
         the room
 
@@ -636,13 +655,10 @@ class Room:
         randSeq = np.zeros(int(np.ceil(self.imResTime * fs)) + 1)
 
         for index in range(len(timeValues)):
-            # print('size of randSeq', randSeq.size)
             if (timeValues[index] > self.imResTime):
                 raise ValueError('time Values sequence exceeds impulse time')
             randSeq[int(np.round(timeValues[index] * fs))] = \
                 poissonProcess[index]
-
-        # print('poissonProcess=', poissonProcess)
 
         # Pass Poisson Process Through Bandpass Filters
         flow = np.array([115, 225, 450, 900, 1800, 3600])
@@ -725,17 +741,18 @@ class Room:
         self.waveform = y * W
         self.ip = np.sum(y, axis=1)
         self.ip = self.ip / np.max(np.abs(self.ip))
-        print(self.ip.shape)
         if (np.any(np.isnan(self.ip))):
-            print(self.ip[np.isnan(self.ip)])
             raise ValueError('NaN values found in ip')
 
-        window_size = 5
-        y_smooth = scipy.signal.convolve2d(y, np.ones(
-            (window_size, 1)) / window_size, mode='same')
-        y_smooth = y_smooth / np.max(np.abs(y_smooth))
+        if filterOutput:
+            window_size = 5
+            self.waveform = scipy.signal.convolve2d(self.waveform, np.ones(
+                (window_size, 1)) / window_size, mode='same')
+            self.waveform = self.waveform / np.max(np.abs(self.waveform))
 
-    def applyRIR(self, audio_file, output_path='./processed_audio.wav'):
+    def applyRIR(self, audio_file: str,
+                 output_path='./processed_audio.wav') -> None:
+        
         """applyRIR apply the RIR to any audio file
 
         Use the RIR to filter a user-specified wav file
@@ -746,7 +763,7 @@ class Room:
             path to the audio wav file
 
         output:path : str
-            output path where the processed audio file should be written, by 
+            output path where the processed audio file should be written, by
             default './'
         Raises
         ------
@@ -754,10 +771,15 @@ class Room:
             No RIR found, self.generateRoomImpulseResponse has to be called
             before this method is executed
         """
+
         if self.ip is None:
             raise RuntimeError("No RIR found, generate RIR before applying it \
                                 to an audio file")
         fs, audioIn = scipy.io.wavfile.read(audio_file)
+        # check for stereo Input
+        if audioIn.shape[1] > 1:
+            audioIn = np.mean(audioIn, axis=1)
+        
         audioOut = scipy.signal.convolve(audioIn, self.ip)
         audioOut = np.real(audioOut)
         audioOut = audioOut / np.max(audioOut)
@@ -805,13 +827,13 @@ if __name__ == '__main__':
     # r.drawBndryBox()
     r.room.show()
     # r.performRayTracing()
-    r.performRayTracing_vectorized(10)
+    r.performRayTracing(5000)
     r.plotEnergyHistogram()
 
     # calculate_RIR(r.TFHist, 1, 1.0, 44100)
-    r.generateRoomImpulseResponse()
+    r.generateRIR()
     # r.generateRIR()
-
-    r.applyRIR('C:/Users/Benes/Documents/Git/roomAcoustics/AcousticZ/data/example_audio/funnyantonia.wav')
+    r.plotWaveform()
+    r.applyRIR('C:/Users/Benes/Documents/Git/roomAcoustics/AcousticZ/data/example_audio/drums.wav')
 
     print(r.roomDimensions)
