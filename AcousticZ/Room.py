@@ -74,6 +74,9 @@ class Room:
         self.ip = None
         self.src_exists = False
         self.recv_exists = False
+
+        self.waveform = None
+        self.impTimes = None
         # self.TFHist = np.zeros([100000, int(self.nFBins)])
 
     def isPointInsideMesh(self, point: np.ndarray[float]):
@@ -103,14 +106,32 @@ class Room:
         is_inside = len(intersections) % 2 == 1
         return is_inside
 
-    def showRoom(self)->None:
+    def showRoom(self) -> None:
         """showRoom Visualize the room with the receiver
 
 
         """
-        scene = \
-            trimesh.Scene([self.room, self.sourceCoord, self.receiverSphere])
+        if self.src_exists and self.recv_exists:
+            scene = \
+                trimesh.Scene([self.room, self.sourceCoord, 
+                               self.receiverSphere])
+        else:
+            scene = trimesh.Scene(self.room)
         scene.show()
+        
+    def plotWaveform(self) -> None:
+        # Plotting
+        if self.waveform is None or self.impTimes is None:
+            raise RuntimeError('No values found to plot')
+        plt.figure()
+        plt.plot(self.impTimes, self.waveform)
+        plt.grid(True)
+        plt.xlabel("Time (s)")
+        plt.ylabel("Impulse Response")
+
+        # plt.xlim(x_min, x_max)
+        plt.ylim(-1, 1)
+        plt.show()
 
     def RandSampleSphere(self, N):
         """RandSampleSphere Generate a number of random 3D directions that point
@@ -347,7 +368,6 @@ class Room:
                 if i == 0:
                     paths = np.hstack((ray_xyz_corr, target)).reshape(-1, 2, 3)
 
-                
                 if visualize:
                     paths = np.vstack(
                         (paths, np.hstack((ray_xyz_corr,
@@ -556,7 +576,7 @@ class Room:
                 [self.room, ray_visualize_scene, self.receiverSphere])
             scene.show()
 
-    def generateRoomImpulseResponse(self):
+    def generateRIR(self):
         """generateRoomImpulseResponse generates the room Impulse Response of
         the room
 
@@ -687,7 +707,7 @@ class Room:
             y[start_index:end_index, :] = np.expand_dims(y_frame, axis=1)
 
         # Combine the filtered sequences
-        impTimes = (1 / fs) * np.arange(y.shape[0])
+        self.impTimes = (1 / fs) * np.arange(y.shape[0])
         W = np.zeros((y.shape[0], len(FVect)))
         BW = fhigh - flow
 
@@ -702,7 +722,7 @@ class Room:
             W[gk0:gk1, :] = val
 
         # Create the impulse response
-        y = y * W
+        self.waveform = y * W
         self.ip = np.sum(y, axis=1)
         self.ip = self.ip / np.max(np.abs(self.ip))
         print(self.ip.shape)
@@ -714,18 +734,8 @@ class Room:
         y_smooth = scipy.signal.convolve2d(y, np.ones(
             (window_size, 1)) / window_size, mode='same')
         y_smooth = y_smooth / np.max(np.abs(y_smooth))
-        # Plotting
-        plt.figure()
-        plt.plot(impTimes, y)
-        plt.grid(True)
-        plt.xlabel("Time (s)")
-        plt.ylabel("Impulse Response")
 
-        # plt.xlim(x_min, x_max)
-        plt.ylim(-1, 1)
-        plt.show()
-
-    def applyRIR(self, audio_file):
+    def applyRIR(self, audio_file, output_path='./processed_audio.wav'):
         """applyRIR apply the RIR to any audio file
 
         Use the RIR to filter a user-specified wav file
@@ -735,6 +745,9 @@ class Room:
         audio_file : str
             path to the audio wav file
 
+        output:path : str
+            output path where the processed audio file should be written, by 
+            default './'
         Raises
         ------
         RuntimeError
@@ -748,7 +761,7 @@ class Room:
         audioOut = scipy.signal.convolve(audioIn, self.ip)
         audioOut = np.real(audioOut)
         audioOut = audioOut / np.max(audioOut)
-        sf.write("./processed_audio.wav", audioOut, fs)
+        sf.write(output_path, audioOut, fs)
 
 
 # room_file = 'C:/Users/Benes/Documents/Git/roomAcoustics/roomAcoustics/roomAcoustics/InteriorTest.obj'

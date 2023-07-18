@@ -74,6 +74,9 @@ class Room:
         self.ip = None
         self.src_exists = False
         self.recv_exists = False
+
+        self.waveform = None
+        self.impTimes = None
         # self.TFHist = np.zeros([100000, int(self.nFBins)])
 
     def isPointInsideMesh(self, point: np.ndarray[float]):
@@ -102,6 +105,33 @@ class Room:
 
         is_inside = len(intersections) % 2 == 1
         return is_inside
+
+    def showRoom(self) -> None:
+        """showRoom Visualize the room with the receiver
+
+
+        """
+        if self.src_exists and self.recv_exists:
+            scene = \
+                trimesh.Scene([self.room, self.sourceCoord, 
+                               self.receiverSphere])
+        else:
+            scene = trimesh.Scene(self.room)
+        scene.show()
+        
+    def plotWaveform(self) -> None:
+        # Plotting
+        if self.waveform is None or self.impTimes is None:
+            raise RuntimeError('No values found to plot')
+        plt.figure()
+        plt.plot(self.impTimes, self.waveform)
+        plt.grid(True)
+        plt.xlabel("Time (s)")
+        plt.ylabel("Impulse Response")
+
+        # plt.xlim(x_min, x_max)
+        plt.ylim(-1, 1)
+        plt.show()
 
     def RandSampleSphere(self, N):
         """RandSampleSphere Generate a number of random 3D directions that point
@@ -245,9 +275,9 @@ class Room:
                    "1000 Hz", "2000 Hz", "4000 Hz"])
         plt.show()
 
-    def performRayTracing_vectorized(self, numberOfRays,
-                                     DEBUGMODE=False):
-        """performRayTracing_vectorized performs main ray tracing algorithm
+    def performRayTracing(self, numberOfRays, visualize=False,
+                          DEBUGMODE=False):
+        """performRayTracing performs main ray tracing algorithm
 
         This method performs the Ray Tracing algorithm and builds the energy
         histogram
@@ -256,6 +286,8 @@ class Room:
         ----------
         numberOfRays : int
            Number of Rays that are traced
+        visualize : bool
+           Enable visualization, by default False 
         DEBUGMODE : bool, optional
             Enables some printouts for troubleshooting, by default False
 
@@ -279,12 +311,10 @@ class Room:
         ray_dxyz = rays
         danger = 0
         error_counter = 0
-        scene = trimesh.Scene(
-            [self.room, self.sourceCoord, self.receiverSphere])
-        scene.show()
+        ray_visualize_scene = trimesh.Scene()
         for iBand in tqdm(range(len(self.FVect))):
             # All rays start at the source
-            ray_xyz = np.zeros([len(rays), 3])  # MOVE THIS TO THE TOP
+            ray_xyz = np.zeros([len(rays), 3])
             ray_xyz[:, :] = self.sourceCoord
 
             receiverCoord = np.zeros([len(rays), 3])
@@ -304,7 +334,6 @@ class Room:
 
             ray_dxyz_old = ray_dxyz
 
-            ray_visualize_scene = trimesh.Scene()
             i = 0
             no_target_found = 0
             while (np.any(ray_time <= self.imResTime)
@@ -339,12 +368,13 @@ class Room:
                 if i == 0:
                     paths = np.hstack((ray_xyz_corr, target)).reshape(-1, 2, 3)
 
-                paths = np.vstack(
-                    (paths, np.hstack((ray_xyz_corr,
-                                      target)).reshape(-1, 2, 3)))
+                if visualize:
+                    paths = np.vstack(
+                        (paths, np.hstack((ray_xyz_corr,
+                                          target)).reshape(-1, 2, 3)))
 
-                ray_visualize_scene.add_geometry(trimesh.load_path(
-                    np.hstack((ray_xyz_corr, target)).reshape(-1, 2, 3)))
+                    ray_visualize_scene.add_geometry(trimesh.load_path(
+                        np.hstack((ray_xyz_corr, target)).reshape(-1, 2, 3)))
 
                 if (np.any(np.linalg.norm(target - ray_xyz, axis=1) < 1e-10)):
                     error_counter += 1
@@ -541,12 +571,12 @@ class Room:
             print('final numbers of rays: ', len(ray_xyz))
             print('number of times where no target was found: ',
                   no_target_found)
+        if visualize:
+            scene = trimesh.Scene(
+                [self.room, ray_visualize_scene, self.receiverSphere])
+            scene.show()
 
-        scene = trimesh.Scene(
-            [self.room, ray_visualize_scene, self.receiverSphere])
-        scene.show()
-
-    def generateRoomImpulseResponse(self):
+    def generateRIR(self):
         """generateRoomImpulseResponse generates the room Impulse Response of
         the room
 
@@ -677,7 +707,7 @@ class Room:
             y[start_index:end_index, :] = np.expand_dims(y_frame, axis=1)
 
         # Combine the filtered sequences
-        impTimes = (1 / fs) * np.arange(y.shape[0])
+        self.impTimes = (1 / fs) * np.arange(y.shape[0])
         W = np.zeros((y.shape[0], len(FVect)))
         BW = fhigh - flow
 
@@ -692,7 +722,7 @@ class Room:
             W[gk0:gk1, :] = val
 
         # Create the impulse response
-        y = y * W
+        self.waveform = y * W
         self.ip = np.sum(y, axis=1)
         self.ip = self.ip / np.max(np.abs(self.ip))
         print(self.ip.shape)
@@ -704,18 +734,8 @@ class Room:
         y_smooth = scipy.signal.convolve2d(y, np.ones(
             (window_size, 1)) / window_size, mode='same')
         y_smooth = y_smooth / np.max(np.abs(y_smooth))
-        # Plotting
-        plt.figure()
-        plt.plot(impTimes, y)
-        plt.grid(True)
-        plt.xlabel("Time (s)")
-        plt.ylabel("Impulse Response")
 
-        # plt.xlim(x_min, x_max)
-        plt.ylim(-1, 1)
-        plt.show()
-
-    def applyRIR(self, audio_file):
+    def applyRIR(self, audio_file, output_path='./processed_audio.wav'):
         """applyRIR apply the RIR to any audio file
 
         Use the RIR to filter a user-specified wav file
@@ -725,6 +745,9 @@ class Room:
         audio_file : str
             path to the audio wav file
 
+        output:path : str
+            output path where the processed audio file should be written, by 
+            default './'
         Raises
         ------
         RuntimeError
@@ -738,7 +761,7 @@ class Room:
         audioOut = scipy.signal.convolve(audioIn, self.ip)
         audioOut = np.real(audioOut)
         audioOut = audioOut / np.max(audioOut)
-        sf.write("./processed_audio.wav", audioOut, fs)
+        sf.write(output_path, audioOut, fs)
 
 
 # room_file = 'C:/Users/Benes/Documents/Git/roomAcoustics/roomAcoustics/roomAcoustics/InteriorTest.obj'

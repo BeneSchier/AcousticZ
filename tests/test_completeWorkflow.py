@@ -15,10 +15,10 @@ def test_completeWorkflow():
     room.createReceiver(point2, 0.0875)
     room.createSource(point1)
     
-    room.performRayTracing_vectorized(numberOfRays=10)
+    room.performRayTracing(numberOfRays=10)
     assert np.all(room.TFHist >= 0) and not np.any(np.isnan(room.TFHist))
     
-    room.generateRoomImpulseResponse()
+    room.generateRIR()
     
     assert (not np.any(np.isnan(room.ip)))
     
