@@ -12,7 +12,6 @@ setup(
     packages=find_packages(),
     package_data={
         'AcousticZ': [
-            '/data/example_audio/*',
             '/data/example_mesh/shoebox.obj',
         ]
     },
