@@ -389,6 +389,7 @@ class Room:
                     indexOfFace = indexOfFace[flawless_index]
                     target = target[flawless_index]
                     receiverCoord = receiverCoord[flawless_index]
+                    
 
                 displacement = target - ray_xyz
 
@@ -543,10 +544,9 @@ class Room:
                     hit_receiverCoord = receiverCoord[hit_index]
                     hit_ray_xyz = ray_xyz[hit_index]
                     hit_ray_dxyz_old = ray_dxyz_old[hit_index]
-                    N = N[hit_index]
+                    hit_N = N[hit_index]
                     theta = theta[hit_index]
 
-                    rayrecv_energy = hit_energy * D[0, iBand]
 
                     # determine rays that are in our time window
                     non_skippable_index = np.where(
@@ -561,7 +561,7 @@ class Room:
                     hit_receiverCoord = hit_receiverCoord[non_skippable_index]
                     hit_ray_xyz = hit_ray_xyz[non_skippable_index]
                     hit_ray_dxyz_old = hit_ray_dxyz_old[non_skippable_index]
-                    N = N[non_skippable_index]
+                    hit_N = hit_N[non_skippable_index]
                     theta = theta[non_skippable_index]
 
                     tbin = np.floor(
