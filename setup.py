@@ -12,7 +12,7 @@ setup(
     packages=find_packages(),
     package_data={
         'AcousticZ': [
-            '/data/example_meshes/shoebox.obj',
+            'data/example_meshes/*.obj'
         ]
     },
     python_requires='>=3.11',
